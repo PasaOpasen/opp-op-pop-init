@@ -102,6 +102,40 @@ class OppositionOperators:
                 return np.array([np.random.uniform(c, x) for c, x in zip(centers, array_of_values)])
             
             return func
+        
+        @staticmethod
+        def quasi(minimums, maximums):
+            """
+            for x and c = (minimums + maximums)/2
+            returns random uniform between abs_opposition(x) and c
+            """
+
+            OppositionOperators.Continual.__assert_sizes(minimums, maximums)
+
+            centers = (minimums + maximums)/2
+            
+            abs_oppositor = OppositionOperators.Continual.abs(minimums, maximums)
+
+            def func(array_of_values):
+                return np.array([np.random.uniform(c, x) for c, x in zip(centers, abs_oppositor(array_of_values))])
+            
+            return func     
+
+        @staticmethod
+        def over(minimums, maximums):
+            """
+            for x and c = (minimums + maximums)/2
+            returns random uniform between x and minimum if x > c and between x and maximum otherwise
+            """
+
+            OppositionOperators.Continual.__assert_sizes(minimums, maximums)
+
+            centers = (minimums + maximums)/2
+
+            def func(array_of_values):
+                return np.array([np.random.uniform(a, x) if x > c else np.random.uniform(b, x) for a, b, c, x in zip(minimums, maximums, centers, array_of_values)])
+            
+            return func  
 
 
         @staticmethod

@@ -1,6 +1,7 @@
 import numpy as np
 
 from helpers import isNumber
+from oppositor import OppositionOperators
 
 
 
@@ -105,10 +106,33 @@ class SampleInitializers:
 
 
 
-class PopulationInitialiser:
+def init_population(total_count, creator, oppositors = None):
+    """
+    Returns population with size total_count*dim
+    using creator and oppositors for creator samples
+    """
 
-    def __init__():
-        pass
+    assert (type(total_count) == int and total_count > 0), f"Invalid total_count argument!"
+    
+    if oppositors is None:
+        return SampleInitializers.CreateSamples(creator, total_count)
+    
+    groups = 1 + len(oppositors)
+
+    if total_count < groups:
+        raise Exception(f"Not enough total_count ({total_count}) for this count of oppositors, needed {groups} at least")
+    
+    group_size = total_count / groups
+    tmp = total_count % groups
+
+    init_pop = SampleInitializers.CreateSamples(creator, group_size + tmp)
+    samples_inds = np.arange(init_pop.shape[0])
+
+    res = [init_pop] + [OppositionOperators.Reflect(init_pop[np.random.choice(samples_inds, group_size, replace = False),:], oppositor) for oppositor in oppositors]
+
+    return np.vstack(tuple(res))
+
+
 
 
 

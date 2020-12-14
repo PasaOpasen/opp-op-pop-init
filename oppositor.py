@@ -1,6 +1,10 @@
 import numpy as np 
 
-
+def isNumber(x):
+    try:
+        return bool(0 == x*0)
+    except:
+        return False
 
 class OppositionOperators:
     
@@ -39,7 +43,135 @@ class OppositionOperators:
     
 
     class Continual:
-        pass
+        @staticmethod
+        def __assert_sizes(min_arr, max_arr):
+            assert (isNumber(min_arr) or isNumber(max_arr) or min_arr.size == max_arr.size), f"Invalid sizes of bounds! {min_arr.size} for first and {max_arr.size} for second"
+
+        @staticmethod
+        def abs(minimums, maximums):
+            """
+            absolute opposition
+            for x between a and b returns (a+b-x)
+
+            for zone [1, 4]x[2, 7]
+            and point (2, 5)
+            returns point (3, 4) 
+            """
+
+            OppositionOperators.Continual.__assert_sizes(minimums, maximums)
+
+            prep = minimums + maximums
+            def func(array_of_values):
+                return prep - array_of_values
+            
+            return func
+        
+        @staticmethod
+        def modular(minimums, maximums):
+            """
+            modular opposition
+
+            for x between a, b
+            c = (a+b)/2
+            returns (x + a - c) mod (b-a)
+            """
+            OppositionOperators.Continual.__assert_sizes(minimums, maximums)
+            
+            diff = maximums - minimums
+            centers = (minimums + maximums)/2
+
+            bias = centers - minimums
+
+            def func(array_of_values):
+                return (array_of_values + bias) % diff
+            
+            return func
+
+        @staticmethod
+        def quasi_reflect(minimums, maximums):
+            """
+            for x and c = (minimums + maximums)/2
+            returns random uniform between x and c
+            """
+
+            OppositionOperators.Continual.__assert_sizes(minimums, maximums)
+
+            centers = (minimums + maximums)/2
+
+            def func(array_of_values):
+                return np.array([np.random.uniform(c, x) for c, x in zip(centers, array_of_values)])
+            
+            return func
+
+
+        @staticmethod
+        def Partial(minimums, maximums, list_of_pairs_inds_vs_oppositor_creators):
+            """
+            Partial oppositor for continual space and common minimums and maximums bounds
+
+            list_of_pairs is list of pairs like ([0, 1, 4], oppositor_creator)
+            """
+            OppositionOperators.Continual.__assert_sizes(minimums, maximums)
+
+            if isNumber(minimums):
+                minimums = np.full(maximums.size, minimums)
+            elif isNumber(maximums):
+                maximums = np.full(minimums.size, maximums)
+
+            indexes_list = [np.array(t[0]) for t in list_of_pairs_inds_vs_oppositor_creators]
+            creators_list = [t[1] for t in list_of_pairs_inds_vs_oppositor_creators]
+
+            list_of_pairs = [(indexes, oppositor_creator(minimums[indexes], maximums[indexes])) for indexes, oppositor_creator in zip(indexes_list, creators_list)]
+
+            return OppositionOperators.PartialOppositor(list_of_pairs)
+
+
+
+    @staticmethod
+    def PartialOppositor(list_of_pairs_inds_vs_oppositor):
+        """
+        Implementation of partial oppositor
+
+        for list/tuple of pairs like [([0, 1, 2], oppositor1) ,  ([4, 6, 7], oppositor2) , ([5, 8, 3], oppositor3) ,]
+
+        returns partial oppositor applying these oppositors for these indexes
+        """
+
+        arrays = [np.array(t[0]) for t in list_of_pairs_inds_vs_oppositor]
+        oppositors = [t[1] for t in list_of_pairs_inds_vs_oppositor]
+
+        dic_of_sets = { }
+        # check repeats
+        for i, arr in enumerate(arrays):
+            lst = list(arr)
+            st = set(lst)
+            if len(lst) > len(st):
+                raise Exception(f"there are repeated indexes at {i} pair")
+            
+            dic_of_sets[i] = st
+        
+        # check intersections
+        for i in range(len(arrays) - 1):
+            for j in range(i+1, len(arrays)):
+                
+                inter = dic_of_sets[i].intersection(dic_of_sets[j])
+
+                if inter:
+                    raise Exception(f"indexes {inter} are common for pairs {i} and {j}")
+        
+
+        def func(array_of_values):
+            cp = array_of_values.copy()
+
+            for indexes, oppositor in zip(arrays, oppositors):
+                cp[indexes] = oppositor(cp[indexes])
+
+            return cp
+
+        return func
+
+
+
 
 
 

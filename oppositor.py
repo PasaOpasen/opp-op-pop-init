@@ -1,13 +1,8 @@
 import numpy as np 
-
-def isNumber(x):
-    try:
-        return bool(0 == x*0)
-    except:
-        return False
+from helpers import isNumber
 
 class OppositionOperators:
-    
+
     class Discrete:
         @staticmethod
         def index_by_order(array_of_sizes):
@@ -203,6 +198,15 @@ class OppositionOperators:
             return cp
 
         return func
+    
+    @staticmethod
+    def Reflect(samples, oppositor):
+        """
+        for each sample in samples creates it's opposition using oppositor function
+
+        samples is 2D numpy array with shape (samples, dimension)
+        """
+        return np.array([oppositor(samples[i, :]) for i in range(samples.shape[0])])
 
 
 

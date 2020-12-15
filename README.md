@@ -1,6 +1,13 @@
 
 # Opposition learning operators and population initializers
 
+[![PyPI
+version](https://badge.fury.io/py/OppOpPopInit.svg)](https://pypi.org/project/OppOpPopInit/)
+
+```
+pip install OppOpPopInit
+```
+
 PyPI package containing opposition learning operators and population initializers for evolutionary algorithms.
 
 - [Opposition learning operators and population initializers](#opposition-learning-operators-and-population-initializers)
@@ -20,6 +27,10 @@ PyPI package containing opposition learning operators and population initializer
     - [Reflect method](#reflect-method)
   - [Population initializers](#population-initializers)
     - [Simple random populations](#simple-random-populations)
+      - [`RandomInteger`](#randominteger)
+      - [`Uniform`](#uniform)
+      - [`Normal`](#normal)
+      - [`Mixed`](#mixed)
     - [Populations with oppositions](#populations-with-oppositions)
 
 
@@ -219,8 +230,36 @@ def func():
     return valid_sample_array 
 ```
 
-There is also `SampleInitializers.Combined(minimums, maximums, list_of_indexes, list_of_initializers_creators)` for generate population with different constructors for each dimension!
+There is also `SampleInitializers.Combined(minimums, maximums, list_of_indexes, list_of_initializers_creators)` for generate population with [different constructors for each dimension](#mixed)!
 
 Use `creator` for initialize population with `k` objects using `SampleInitializers.CreateSamples(creator, k)`.
 
+#### `RandomInteger`
+
+[Code](tests/random_int_pop.py)
+![](tests/random_int_pop.png)
+
+#### `Uniform`
+
+[Code](tests/random_uniform_pop.py)
+![](tests/random_uniform_pop.png)
+
+#### `Normal`
+
+[Code](tests/random_normal_pop.py)
+![](tests/random_normal_pop.png)
+
+#### `Mixed`
+
+[Code](tests/random_mixed_pop.py)
+![](tests/random_mixed_pop.png)
+
+
 ### Populations with oppositions
+
+Use `init_population(total_count, creator, oppositors = None)` to create population of size `total_count` where some objects are constructed by `creator` and other objects are constructed by applying each oppositor from `oppositors` to start objects.
+
+[Code](tests/pop_with_oppositors.py)
+![](tests/pop_with_op.png)
+![](tests/pop_with_op2.png)
+![](tests/pop_with_op3.png)

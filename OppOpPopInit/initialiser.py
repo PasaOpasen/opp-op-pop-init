@@ -101,7 +101,7 @@ class SampleInitializers:
         """
         returns count objects (as 2D-array) using creator
         """
-        return np.array([creator() for _ in range(count)])
+        return np.array([creator() for _ in range(int(count))])
 
 
 
@@ -122,7 +122,7 @@ def init_population(total_count, creator, oppositors = None):
     if total_count < groups:
         raise Exception(f"Not enough total_count ({total_count}) for this count of oppositors, needed {groups} at least")
     
-    group_size = total_count / groups
+    group_size = int(total_count / groups)
     tmp = total_count % groups
 
     init_pop = SampleInitializers.CreateSamples(creator, group_size + tmp)

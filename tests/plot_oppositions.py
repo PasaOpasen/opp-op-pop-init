@@ -34,7 +34,7 @@ def plot_oppositions(point, oppositions, bounds, names, title, net = False, save
                      arrowprops = dict(arrowstyle="fancy"),
                      bbox=dict(boxstyle="round", fc="w"))
 
-    plt.plot(point[0], point[1], 'ro', color = 'green', label = 'current points', markeredgecolor = "black")
+    plt.plot(point[0], point[1], 'ro', color = 'green', label = 'current point', markeredgecolor = "black")
     plt.plot(oppositions[:, 0], oppositions[:, 1], 'ro', color = 'red', label = 'points oppositions', markeredgecolor = "black")
 
     
@@ -44,12 +44,12 @@ def plot_oppositions(point, oppositions, bounds, names, title, net = False, save
         
         return (xmin*rx + (1-rx)*xmax, ymin*ry + (1-ry)*ymax)
 
-    plt.annotate('center of zone', xy = ((xmin+xmax)/2, (ymin+ymax)/2), 
-                 xytext = random_coords(xmin, xmax, ymin, ymax, wd = 0.3) ,
-             arrowprops=dict(facecolor='red', shrink=0.05), 
-              #color = 'red',
-              bbox = dict(boxstyle ="round", fc ="0.8")#, arrowprops = arrowprops
-             )
+    #plt.annotate('center of zone', xy = ((xmin+xmax)/2, (ymin+ymax)/2), 
+    #             xytext = random_coords(xmin, xmax, ymin, ymax, wd = 0.3) ,
+    #         arrowprops=dict(facecolor='red', shrink=0.05), 
+    #          #color = 'red',
+    #          bbox = dict(boxstyle ="round", fc ="0.8")#, arrowprops = arrowprops
+    #         )
 
 
     plt.legend()

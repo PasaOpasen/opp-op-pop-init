@@ -15,9 +15,12 @@ PyPI package containing opposition learning operators and population initializer
       - [`quasi_reflect` oppositor](#quasi_reflect-oppositor)
       - [`over` oppositor](#over-oppositor)
       - [`integers_by_order` oppositor](#integers_by_order-oppositor)
+      - [More examples](#more-examples)
     - [Partial oppositor](#partial-oppositor)
     - [Reflect method](#reflect-method)
   - [Population initializers](#population-initializers)
+    - [Simple random populations](#simple-random-populations)
+    - [Populations with oppositions](#populations-with-oppositions)
 
 
 ## About opposition operators
@@ -54,6 +57,13 @@ Checklist:
 * `OppositionOperators.Continual.Partial` -- for using different opposition operators for each dimension with continual task
 * `OppositionOperators.Discrete.integers_by_order` -- it's like `abs` operator but for integer values
 * `OppositionOperators.PartialOppositor` -- for using different opposition operators for each dimension with continual or mixed task. See example [below](#partial-oppositor)
+
+U can create your own oppositor using pattern:
+```python
+def oppositor(sample_as_array):
+    # some code
+    return new_sample_as_array
+```
 
 There are also `OppositionOperators.Discrete.index_by_order` and `OppositionOperators.Discrete.value_by_order` constructors for very special discrete tasks with available sets of valid values (like `[-1, 0, 1, 5, 15]`), but it's highly recommended to convert this task to indexes array task (and use `OppositionOperators.Discrete.integers_by_order`) like below:
 
@@ -112,6 +122,14 @@ def new_optimized_functio(new_arr):
 
 [Code](tests/integers_op.py)
 ![](tests/integers_by_order.png)
+
+#### More examples
+
+![](tests/more_1.png)
+![](tests/more_2.png)
+![](tests/more_3.png)
+![](tests/more_4.png)
+![](tests/more_5.png)
 
 ### Partial oppositor
 
@@ -186,4 +204,23 @@ Use `OppositionOperators.Reflect(samples, oppositor)` for oppose samples array u
 
 ## Population initializers
 
+### Simple random populations
 
+Like `oppositors operators` there are some constructors for creating start population:
+
+* `SampleInitializers.RandomInteger(minimums, maximums)` -- returns function which will return random integer vectors between `minimums` and `maximums`
+* `SampleInitializers.Uniform(minimums, maximums)` -- returns function which will return random vectors between `minimums` and `maximums` from uniform distribution
+* `SampleInitializers.Normal(minimums, maximums, sd = None)` -- returns function which will return random vectors between `minimums` and `maximums` from normal distribution
+
+U can create your initializer function:
+```python
+def func():
+    # code
+    return valid_sample_array 
+```
+
+There is also `SampleInitializers.Combined(minimums, maximums, list_of_indexes, list_of_initializers_creators)` for generate population with different constructors for each dimension!
+
+Use `creator` for initialize population with `k` objects using `SampleInitializers.CreateSamples(creator, k)`.
+
+### Populations with oppositions

@@ -1,5 +1,5 @@
 import numpy as np 
-from helpers import isNumber
+from .helpers import isNumber
 
 class OppositionOperators:
 
@@ -34,6 +34,25 @@ class OppositionOperators:
                 return by_index(np.array([arr.index(val) for arr, val in zip(list_of_valid_lists, array_of_values)]))
             
             return func
+        
+        @staticmethod
+        def integers_by_order(minimums, maximums):
+            """
+            returns like Continual abs 
+            but for integer variables
+            """
+            
+            assert (type(minimums) == int or type(maximums) == int or minimums.size == maximums.size), f"Invalid sizes of bounds! {minimums.size} for first and {maximums.size} for second"
+
+            to_zero = (maximums - minimums)
+
+            oppositor = OppositionOperators.Discrete.index_by_order(to_zero)
+
+            return lambda array_of_values: minimums + oppositor(array_of_values - minimums)
+
+
+
+
 
     
 

@@ -12,7 +12,7 @@ def plot_oppositions(point, oppositions, bounds, names, title, net = False, save
 
     if net:
         xs = np.arange(round(xmin), round(xmax) + 1)
-        ys = np.arange(round(xmin), round(xmax) + 1)
+        ys = np.arange(round(ymin), round(ymax) + 1)
 
         for xc in xs:
             plt.axvline(x=xc, color='k', linestyle='--', lw = 0.3)

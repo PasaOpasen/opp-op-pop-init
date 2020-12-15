@@ -1,7 +1,7 @@
 import numpy as np
 
-from helpers import isNumber
-from oppositor import OppositionOperators
+from .helpers import isNumber
+from .oppositor import OppositionOperators
 
 
 
@@ -64,8 +64,8 @@ class SampleInitializers:
 
         dic_of_sets = {i: set(list(inds)) for i, inds in enumerate(list_of_indexes)}
 
-        for i, s in dic_of_sets:
-            if not (s in all_indexes):
+        for i, s in dic_of_sets.items():
+            if (s-all_indexes):
                 raise Exception(f"indexes should be between 0 and {dim} but {i}-element has {s}")
         
         for i in range(dim-1):

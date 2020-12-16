@@ -3,6 +3,9 @@
 
 [![PyPI
 version](https://badge.fury.io/py/OppOpPopInit.svg)](https://pypi.org/project/OppOpPopInit/)
+[![Downloads](https://pepy.tech/badge/oppoppopinit)](https://pepy.tech/project/oppoppopinit)
+[![Downloads](https://pepy.tech/badge/oppoppopinit/month)](https://pepy.tech/project/oppoppopinit)
+[![Downloads](https://pepy.tech/badge/oppoppopinit/week)](https://pepy.tech/project/oppoppopinit)
 
 ```
 pip install OppOpPopInit

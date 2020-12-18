@@ -55,8 +55,8 @@ class SampleInitializers:
         """
         returns creator which creates vectors between minimums and maximums using list_of_initializers_creators creators for each list_of_indexes indexes of vector
         """
-
-        assert (len(list_of_indexes) == len(list_of_initializers_creators)), "Indexes list and Initializers creators list must have equal length"
+        inits_len = len(list_of_indexes)
+        assert (inits_len == len(list_of_initializers_creators)), "Indexes list and Initializers creators list must have equal length"
         
         dim = minimums.size
 
@@ -68,8 +68,8 @@ class SampleInitializers:
             if (s-all_indexes):
                 raise Exception(f"indexes should be between 0 and {dim} but {i}-element has {s}")
         
-        for i in range(dim-1):
-            for j in range(i+1, dim):
+        for i in range(inits_len-1):
+            for j in range(i+1, inits_len):
                 if dic_of_sets[i].intersection(dic_of_sets[j]):
                     raise Exception(f"there are common indexes between {i} element and indexes from {j} element")
         

@@ -166,7 +166,7 @@ class OppositionOperators:
             elif isNumber(maximums):
                 maximums = np.full(minimums.size, maximums)
 
-            indexes_list = [np.array(t[0]) for t in list_of_pairs_inds_vs_oppositor_creators]
+            indexes_list = [np.array(t[0], dtype = np.int8) for t in list_of_pairs_inds_vs_oppositor_creators]
             creators_list = [t[1] for t in list_of_pairs_inds_vs_oppositor_creators]
 
             list_of_pairs = [(indexes, oppositor_creator(minimums[indexes], maximums[indexes])) for indexes, oppositor_creator in zip(indexes_list, creators_list)]
@@ -185,7 +185,7 @@ class OppositionOperators:
         returns partial oppositor applying these oppositors for these indexes
         """
 
-        arrays = [np.array(t[0]) for t in list_of_pairs_inds_vs_oppositor]
+        arrays = [np.array(t[0], dtype = np.int8) for t in list_of_pairs_inds_vs_oppositor]
         oppositors = [t[1] for t in list_of_pairs_inds_vs_oppositor]
 
         dic_of_sets = { }

@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="OppOpPopInit", 
-    version="1.0.1",
+    version="1.0.3",
     author="Demetry Pascal",
     author_email="qtckpuhdsa@gmail.com",
     maintainer = ['Demetry Pascal'],
@@ -23,7 +23,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    install_requires=['numpy']
+    install_requires=['numpy', 'matplotlib']
     
     )
 

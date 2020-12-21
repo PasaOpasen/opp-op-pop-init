@@ -28,6 +28,7 @@ PyPI package containing opposition learning operators and population initializer
       - [More examples](#more-examples)
     - [Partial oppositor](#partial-oppositor)
     - [Reflect method](#reflect-method)
+    - [Reflection with selection best](#reflection-with-selection-best)
   - [Population initializers](#population-initializers)
     - [Simple random populations](#simple-random-populations)
       - [`RandomInteger`](#randominteger)
@@ -215,6 +216,26 @@ oppositions
 ### Reflect method
 
 Use `OppositionOperators.Reflect(samples, oppositor)` for oppose samples array using some oppositor. `samples` argument here is 2D-array with size samples*dimension.
+
+### Reflection with selection best
+
+There is `OppositionOperators.ReflectWithSelectionBest(population_samples, oppositor, eval_func, samples_scores = None, more_is_better = False)` method for reflect population (with size `N`) and select best `N` objects from existing `2N` objects. It has parameters:
+
+* `population_samples` : 2D numpy array;
+            reflected population.
+* `oppositor` : function;
+            applying oppositor.
+* `eval_func` : function;
+            optimized function of population/task.
+* `samples_scores` : `None`/1D numpy array, optional;
+            scores for reflected population (if calculated -- it's not necessary to calculate it again). The default is `None`.
+* `more_is_better` : logical, optional;
+            The goal -- is maximize the function. The default is `False`.
+
+See [example](tests/reflection_with_selection.py)
+
+![](tests/reflection_with_selection_before.png)
+![](tests/reflection_with_selection_after.png)
 
 ## Population initializers
 

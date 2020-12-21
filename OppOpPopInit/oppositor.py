@@ -226,8 +226,49 @@ class OppositionOperators:
         samples is 2D numpy array with shape (samples, dimension)
         """
         return np.array([oppositor(samples[i, :]) for i in range(samples.shape[0])])
+    
 
+    @staticmethod
+    def ReflectWithSelectionBest(population_samples, oppositor, eval_func, samples_scores = None, more_is_better = False):
+        """
+        Reflect N objects from population, evaluate scores and select best N from 2N
 
+        Parameters
+        ----------
+        population_samples : 2D numpy array
+            reflected population.
+        oppositor : function
+            applying oppositor.
+        eval_func : function
+            optimized function of population/task.
+        samples_scores : None/1D numpy array, optional
+            scores for reflected population (if calculated -- it's not necessary to calculate it again). The default is None.
+        more_is_better : logical, optional
+            The goal -- is maximize the function. The default is False.
+
+        Returns
+        -------
+        2d numpy array
+            new population -- the best N from start N + reflected N objects.
+        1d numpy array
+            it's scores sorted from best to worse.
+        """
+
+        N = population_samples.shape[0]
+
+        samples2 = OppositionOperators.Reflect(population_samples, oppositor)
+
+        samples_total = np.vstack((population_samples, samples2))
+
+        if samples_scores is None:
+            scores = np.array([eval_func(samples_total[i, :]) for i in range(N*2)])
+        else:
+            scores = np.concatenate((samples_scores, np.array([eval_func(samples2[i, :]) for i in range(N)])))
+
+        args = np.argsort(scores)
+        args = args[-N::-1] if more_is_better else args[:N] 
+
+        return samples_total[args, :], scores[args]
 
 
 

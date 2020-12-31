@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="OppOpPopInit", 
-    version="1.1.0",
+    version="1.1.1",
     author="Demetry Pascal",
     author_email="qtckpuhdsa@gmail.com",
     maintainer = ['Demetry Pascal'],

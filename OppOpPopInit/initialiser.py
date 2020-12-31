@@ -82,9 +82,8 @@ class SampleInitializers:
             raise Exception(f"It's lack of indexes {all_indexes-un} in list_of_indexes")
 
 
-        indexes_lst = [np.array(lst, dtype = np.int8) for lst in list_of_indexes]
+        indexes_lst = [np.array(lst, dtype = np.int16) for lst in list_of_indexes]
         initializers = [initializer_creator(minimums[indexes], maximums[indexes]) for indexes, initializer_creator in zip(indexes_lst, list_of_initializers_creators)]
-
 
         def func():
             cp = np.empty(dim)

@@ -1,4 +1,8 @@
+
+import warnings
+
 import numpy as np 
+
 from .helpers import isNumber
 
 class OppositionOperators:
@@ -205,7 +209,8 @@ class OppositionOperators:
                 inter = dic_of_sets[i].intersection(dic_of_sets[j])
 
                 if inter:
-                    raise Exception(f"indexes {inter} are common for pairs {i} and {j}")
+                    #raise Exception(f"indexes {inter} are common for pairs {i} and {j}")
+                    warnings.warn(f"indexes {inter} are common for pairs {i} and {j}")
         
 
         def func(array_of_values):
@@ -218,6 +223,64 @@ class OppositionOperators:
 
         return func
     
+    @staticmethod
+    def RandomPartialOppositor(list_of_count_step_oppositor_creator, minimums, maximums, total_dim):
+        """
+        Returns random partial oppositor with these options:
+        argument is the list of tuples like (how_many_indexes_for_current_oppositor, times_to_repeate_before_reinit, oppositor)
+        so it creates oppositor with random indexes for each oppositor and repeates calculations some iteration before reinit random indexes for new oppositor
+        """
+
+        # convert start data
+        def get_part(place):
+            return [t[place] for t in list_of_count_step_oppositor_creator]
+
+        random_counts = get_part(0)
+        steps = np.array(get_part(1))
+        oppositors_creators = get_part(2)
+
+        # local variables
+        all_indexes = np.arange(total_dim)
+        need_to_recreate = np.zeros(len(steps), dtype = np.bool) # flag of need to recreate some part of partial oppositor
+        current_counts = np.zeros(len(steps), dtype = np.int16) # counts of current usage by each part of oppositors
+        current_indexes = [np.random.choice(all_indexes, count, replace = False) for count in random_counts] # indexes of oppositors
+        oppositors = [op(minimums[indexes], maximums[indexes]) for op, indexes in zip(oppositors_creators, current_indexes)]
+
+        total_oppositor = lambda tmp:None
+        def recreate_oppositor():
+            nonlocal total_oppositor
+            total_oppositor = OppositionOperators.PartialOppositor([[indexes, oppositor] for indexes, oppositor in zip(current_indexes, oppositors)])
+        
+        recreate_oppositor()
+
+        def func(array_of_values):
+            nonlocal current_counts, current_indexes, need_to_recreate, oppositors
+
+            answer = total_oppositor(array_of_values)
+            #raise Exception()
+            current_counts += 1
+            need_to_recreate = current_counts == steps
+
+            # if it's needed to create some part of oppositor
+            if np.sum(need_to_recreate) > 0:
+                for i, need in enumerate(need_to_recreate):
+                    if need:
+                        current_indexes[i] = np.random.choice(all_indexes, random_counts[i], replace = False) # recount needed indexes
+                        current_counts[i] = 0 # reinit cuz it will be new oppositor
+                        oppositors[i] = oppositors_creators[i](minimums[current_indexes[i]], maximums[current_indexes[i]])
+                
+                # reinit some data
+                need_to_recreate = np.zeros_like(need_to_recreate, dtype = np.bool)
+
+                recreate_oppositor() # recreate our oppositor with some new parts
+
+            return answer
+        
+        return func
+
+
+
+
     @staticmethod
     def Reflect(samples, oppositor):
         """

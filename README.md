@@ -27,6 +27,7 @@ PyPI package containing opposition learning operators and population initializer
       - [`integers_by_order` oppositor](#integers_by_order-oppositor)
       - [More examples](#more-examples)
     - [Partial oppositor](#partial-oppositor)
+    - [RandomPartialOppositor](#randompartialoppositor)
     - [Reflect method](#reflect-method)
     - [Reflection with selection best](#reflection-with-selection-best)
   - [Population initializers](#population-initializers)
@@ -212,6 +213,28 @@ oppositions
 
 [Another example code](tests/mixed_op.py)
 ![](tests/mixed.png)
+
+
+### RandomPartialOppositor
+
+Create `RandomPartialOppositor` oppositor using this structure:
+
+```python
+oppositor = OppositionOperators.RandomPartialOppositor(
+    [
+        (count_of_random_dimensions, repeate_config_during_steps, oppositor_creator),
+        (count_of_random_dimensions, repeate_config_during_steps, oppositor_creator),
+        ...
+        (count_of_random_dimensions, repeate_config_during_steps, oppositor_creator)
+    ],
+    minimums,
+    maximums,
+    current_dimension_count
+)
+```
+
+See [simplest example of using](tests/random%20partial%20oppositor.py)
+
 
 ### Reflect method
 

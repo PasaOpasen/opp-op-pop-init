@@ -21,7 +21,7 @@ max_bound = np.array([16, 26])
 
 creator = SampleInitializers.RandomInteger(minimums = min_bound, maximums=max_bound)
 
-points = init_population(total_count = 3, creator= creator)
+points = init_population(samples_count= 3, creator= creator)
 
 
 oppositor = OppositionOperators.Discrete.integers_by_order(minimums= min_bound, maximums= max_bound)

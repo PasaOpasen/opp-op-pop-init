@@ -29,7 +29,7 @@ creator = SampleInitializers.Combined(
         ]
         )
 
-points = init_population(total_count = 4, creator= creator)
+points = init_population(samples_count= 4, creator= creator)
 
 oppositor = OppositionOperators.PartialOppositor(
     [

@@ -21,7 +21,7 @@ max_bound = np.array([16, 26])
 
 creator = SampleInitializers.Normal(minimums = min_bound, maximums=max_bound)
 
-points = init_population(total_count = 40, creator= creator)
+points = init_population(samples_count= 40, creator= creator)
 
 
 plot_pop(points,  

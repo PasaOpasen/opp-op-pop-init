@@ -28,7 +28,7 @@ oppositors = [
     ]
 
 
-points = init_population(total_count = 60, creator= creator, oppositors = oppositors)
+points = init_population(samples_count= 60, creator= creator, oppositors = oppositors)
 
 
 plot_pop_op(points, 

@@ -21,7 +21,7 @@ max_bound = np.array([16, 26])
 
 creator = SampleInitializers.Uniform(minimums = min_bound, maximums=max_bound)
 
-point = init_population(total_count = 1, creator= creator)
+point = init_population(samples_count= 1, creator= creator)
 
 
 oppositors = [

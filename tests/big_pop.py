@@ -18,4 +18,4 @@ creator = SampleInitializers.Combined(
                 ] )
 
 
-pop = init_population(total_count = 100, creator = creator, oppositors = None) 
+pop = init_population(samples_count= 100, creator = creator, oppositors = None)

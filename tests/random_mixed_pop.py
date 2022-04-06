@@ -31,7 +31,7 @@ creator = SampleInitializers.Combined(
     )
 
 
-points = init_population(total_count = 150, creator= creator)
+points = init_population(samples_count= 150, creator= creator)
 
 
 plt.suptitle(r"$\bf{Uniform}$ for first dim and $\bf{Normal}$ for second dim")

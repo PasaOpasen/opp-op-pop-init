@@ -1,72 +1,75 @@
 
+from typing import Sequence, Union, Tuple, Callable
+
 import warnings
 
+import random
 import numpy as np 
 
-from .helpers import isNumber
+from .utils import is_number, _check_mins_maxs
+
 
 class OppositionOperators:
 
     class Discrete:
+
         @staticmethod
-        def index_by_order(array_of_sizes):
+        def _index_by_order(sizes: np.ndarray):
             """
             for array of sizes [4, 5, 6]
-            and indexes [0, 3, 2]
-            returns opposition indexes [4-1-0, 5-1-3, 6-1-2] = [3, 1, 3]
+            returns function which
+                for indexes (from the end) [0, 3, 2]
+                returns opposition indexes [4-1-0, 5-1-3, 6-1-2] = [3, 1, 3]
             """
-            def func(array_of_indexes):
-                return np.array([size - 1 - index for index, size in zip(array_of_indexes, array_of_sizes)])
-            
+            def func(indexes: np.ndarray):
+                return sizes - 1 - indexes
             return func
         
         @staticmethod
-        def value_by_order(list_of_valid_arrays):
+        def value_by_order(arrays: Sequence[np.ndarray]):
             """
             for list of arrays [ [23, 26, 42] , [78, 53, 12, 11] ]
-            and values [23, 12]
-            returns opposition values [42, 53] 
+            returns function which
+                for values [23, 12]
+                returns opposition values [42, 53]
             it's like index_by_order but using values from array, not positions
             """
-            arr_sizes = np.array([len(arr) for arr in list_of_valid_arrays])
+            arr_sizes = np.array([arr.size for arr in arrays])
 
-            by_index = OppositionOperators.Discrete.index_by_order(arr_sizes)
+            by_index = OppositionOperators.Discrete._index_by_order(arr_sizes)
 
-            list_of_valid_lists = [list(arr) for arr in list_of_valid_arrays]
+            valid_lists = [arr.tolist() for arr in arrays]
 
-            def func(array_of_values):
-                return by_index(np.array([arr.index(val) for arr, val in zip(list_of_valid_lists, array_of_values)]))
+            def func(values: np.ndarray):
+                return by_index(
+                    np.array([arr.index(val) for arr, val in zip(valid_lists, values)])
+                )
             
             return func
         
         @staticmethod
-        def integers_by_order(minimums, maximums):
+        def integers_by_order(
+            minimums: Union[int, Sequence[int]],
+            maximums: Union[int, Sequence[int]]
+        ):
             """
             returns like Continual abs 
             but for integer variables
             """
-            
-            assert (type(minimums) == int or type(maximums) == int or minimums.size == maximums.size), f"Invalid sizes of bounds! {minimums.size} for first and {maximums.size} for second"
+            mins, maxs = _check_mins_maxs(minimums, maximums, check_int=True)
 
-            to_zero = (maximums - minimums)
+            to_zero = maxs - mins
 
-            oppositor = OppositionOperators.Discrete.index_by_order(to_zero)
-
-            return lambda array_of_values: minimums + oppositor(array_of_values - minimums)
-
-
-
-
-
-    
+            oppositor = OppositionOperators.Discrete._index_by_order(to_zero)
+            return lambda array_of_values: mins + oppositor(array_of_values - mins)
 
     class Continual:
-        @staticmethod
-        def __assert_sizes(min_arr, max_arr):
-            assert (isNumber(min_arr) or isNumber(max_arr) or min_arr.size == max_arr.size), f"Invalid sizes of bounds! {min_arr.size} for first and {max_arr.size} for second"
 
         @staticmethod
-        def abs(minimums, maximums):
+        def abs(
+            minimums: Union[float, Sequence[float]],
+            maximums: Union[float, Sequence[float]]
+        ):
             """
             absolute opposition
             for x between a and b returns (a+b-x)
@@ -76,16 +79,20 @@ class OppositionOperators:
             returns point (3, 4) 
             """
 
-            OppositionOperators.Continual.__assert_sizes(minimums, maximums)
+            mins, maxs = _check_mins_maxs(minimums, maximums)
 
-            prep = minimums + maximums
-            def func(array_of_values):
-                return prep - array_of_values
+            prep = mins + maxs
+
+            def func(values: np.ndarray):
+                return prep - values
             
             return func
         
         @staticmethod
-        def modular(minimums, maximums):
+        def modular(
+            minimums: Union[float, Sequence[float]],
+            maximums: Union[float, Sequence[float]]
+        ):
             """
             modular opposition
 
@@ -93,128 +100,147 @@ class OppositionOperators:
             c = (a+b)/2
             returns (x + a - c) mod (b-a)
             """
-            OppositionOperators.Continual.__assert_sizes(minimums, maximums)
+            mins, maxs = _check_mins_maxs(minimums, maximums)
             
-            diff = maximums - minimums
-            centers = (minimums + maximums)/2
+            diff = maxs - mins
+            centers = (mins + maxs)/2
 
-            bias = centers - minimums
+            bias = centers - mins
 
-            def func(array_of_values):
-                return (array_of_values + bias) % diff
+            def func(values: np.ndarray):
+                return (values + bias) % diff
             
             return func
 
         @staticmethod
-        def quasi_reflect(minimums, maximums):
+        def quasi_reflect(
+            minimums: Union[float, Sequence[float]],
+            maximums: Union[float, Sequence[float]]
+        ):
             """
             for x and c = (minimums + maximums)/2
             returns random uniform between x and c
             """
 
-            OppositionOperators.Continual.__assert_sizes(minimums, maximums)
+            mins, maxs = _check_mins_maxs(minimums, maximums)
 
-            centers = (minimums + maximums)/2
+            centers = (mins + maxs)/2
 
-            def func(array_of_values):
-                return np.array([np.random.uniform(c, x) for c, x in zip(centers, array_of_values)])
+            def func(values: np.ndarray):
+                return np.array([random.uniform(c, x) for c, x in zip(centers, values)])
             
             return func
         
         @staticmethod
-        def quasi(minimums, maximums):
+        def quasi(
+            minimums: Union[float, Sequence[float]],
+            maximums: Union[float, Sequence[float]]
+        ):
             """
             for x and c = (minimums + maximums)/2
             returns random uniform between abs_opposition(x) and c
             """
 
-            OppositionOperators.Continual.__assert_sizes(minimums, maximums)
+            mins, maxs = _check_mins_maxs(minimums, maximums)
 
-            centers = (minimums + maximums)/2
+            centers = (mins + maxs)/2
             
-            abs_oppositor = OppositionOperators.Continual.abs(minimums, maximums)
+            abs_oppositor = OppositionOperators.Continual.abs(mins, maxs)
 
-            def func(array_of_values):
-                return np.array([np.random.uniform(c, x) for c, x in zip(centers, abs_oppositor(array_of_values))])
+            def func(values: np.ndarray):
+                return np.array([random.uniform(c, x) for c, x in zip(centers, abs_oppositor(values))])
             
             return func     
 
         @staticmethod
-        def over(minimums, maximums):
+        def over(
+            minimums: Union[float, Sequence[float]],
+            maximums: Union[float, Sequence[float]]
+        ):
             """
             for x and c = (minimums + maximums)/2
             returns random uniform between x and minimum if x > c and between x and maximum otherwise
             """
 
-            OppositionOperators.Continual.__assert_sizes(minimums, maximums)
+            mins, maxs = _check_mins_maxs(minimums, maximums)
 
-            centers = (minimums + maximums)/2
+            centers = (mins + maxs)/2
 
-            def func(array_of_values):
-                return np.array([np.random.uniform(a, x) if x > c else np.random.uniform(b, x) for a, b, c, x in zip(minimums, maximums, centers, array_of_values)])
+            def func(values: np.ndarray):
+                return np.array([random.uniform(a, x) if x > c else random.uniform(b, x) for a, b, c, x in zip(mins, maxs, centers, values)])
             
             return func  
 
-
         @staticmethod
-        def Partial(minimums, maximums, list_of_pairs_inds_vs_oppositor_creators):
+        def Partial(
+            minimums: Union[float, Sequence[float]],
+            maximums: Union[float, Sequence[float]],
+            indexes_to_opp_creator: Sequence[
+                Tuple[
+                    Sequence[int],
+                    Callable[
+                        [np.ndarray, np.ndarray],
+                        Callable[[np.ndarray], np.ndarray]
+                    ]
+                ]
+            ]
+        ):
             """
             Partial oppositor for continual space and common minimums and maximums bounds
 
-            list_of_pairs is list of pairs like ([0, 1, 4], oppositor_creator)
+            indexes_to_opp_creator is list of pairs like ([0, 1, 4], oppositor_creator)
             """
-            OppositionOperators.Continual.__assert_sizes(minimums, maximums)
+            mins, maxs = _check_mins_maxs(minimums, maximums)
 
-            if isNumber(minimums):
-                minimums = np.full(maximums.size, minimums)
-            elif isNumber(maximums):
-                maximums = np.full(minimums.size, maximums)
+            indexes_list = [np.array(t[0], dtype=np.int16) for t in indexes_to_opp_creator]
+            creators_list = [t[1] for t in indexes_list]
 
-            indexes_list = [np.array(t[0], dtype = np.int16) for t in list_of_pairs_inds_vs_oppositor_creators]
-            creators_list = [t[1] for t in list_of_pairs_inds_vs_oppositor_creators]
-
-            list_of_pairs = [(indexes, oppositor_creator(minimums[indexes], maximums[indexes])) for indexes, oppositor_creator in zip(indexes_list, creators_list)]
+            list_of_pairs = [
+                (indexes, oppositor_creator(mins[indexes], maxs[indexes]))
+                for indexes, oppositor_creator in zip(indexes_list, creators_list)
+            ]
 
             return OppositionOperators.PartialOppositor(list_of_pairs)
 
-
-
     @staticmethod
-    def PartialOppositor(list_of_pairs_inds_vs_oppositor):
+    def PartialOppositor(
+        indexes_to_oppositor: Sequence[
+            Tuple[
+                Sequence[int],
+                Callable[[np.ndarray], np.ndarray]
+            ]
+        ]
+    ):
         """
         Implementation of partial oppositor
 
-        for list/tuple of pairs like [([0, 1, 2], oppositor1) ,  ([4, 6, 7], oppositor2) , ([5, 8, 3], oppositor3) ,]
+        for sequence of pairs like [([0, 1, 2], oppositor1) ,  ([4, 6, 7], oppositor2) , ([5, 8, 3], oppositor3) ,]
 
         returns partial oppositor applying these oppositors for these indexes
         """
 
-        arrays = [np.array(t[0], dtype = np.int16) for t in list_of_pairs_inds_vs_oppositor]
-        oppositors = [t[1] for t in list_of_pairs_inds_vs_oppositor]
+        arrays = [np.array(t[0], dtype=np.int16) for t in indexes_to_oppositor]
+        oppositors = [t[1] for t in indexes_to_oppositor]
 
-        dic_of_sets = { }
+        dic_of_sets = {}
         # check repeats
         for i, arr in enumerate(arrays):
             lst = list(arr)
             st = set(lst)
             if len(lst) > len(st):
                 raise Exception(f"there are repeated indexes at {i} pair")
-            
             dic_of_sets[i] = st
         
         # check intersections
         for i in range(len(arrays) - 1):
             for j in range(i+1, len(arrays)):
-                
-                inter = dic_of_sets[i].intersection(dic_of_sets[j])
-
+                inter = dic_of_sets[i] & dic_of_sets[j]
                 if inter:
                     #raise Exception(f"indexes {inter} are common for pairs {i} and {j}")
                     warnings.warn(f"indexes {inter} are common for pairs {i} and {j}")
-        
 
-        def func(array_of_values):
-            cp = array_of_values.copy()
+        def func(values: np.ndarray) -> np.ndarray:
+            cp = values.copy()
 
             for indexes, oppositor in zip(arrays, oppositors):
                 cp[indexes] = oppositor(cp[indexes])
@@ -222,7 +248,9 @@ class OppositionOperators:
             return cp
 
         return func
-    
+
+    ########################################################################
+
     @staticmethod
     def RandomPartialOppositor(list_of_count_step_oppositor_creator, minimums, maximums, total_dim):
         """
@@ -278,9 +306,6 @@ class OppositionOperators:
         
         return func
 
-
-
-
     @staticmethod
     def Reflect(samples, oppositor):
         """
@@ -289,7 +314,6 @@ class OppositionOperators:
         samples is 2D numpy array with shape (samples, dimension)
         """
         return np.array([oppositor(samples[i, :]) for i in range(samples.shape[0])])
-    
 
     @staticmethod
     def ReflectWithSelectionBest(population_samples, oppositor, eval_func, samples_scores = None, more_is_better = False):

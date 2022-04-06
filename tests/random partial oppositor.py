@@ -22,7 +22,7 @@ maximums = np.full(dim, 5)
 
 creator = SampleInitializers.RandomInteger(minimums, maximums)
 
-points = init_population(total_count = 6, creator= creator)
+points = init_population(samples_count= 6, creator= creator)
 
 oppositor = OppositionOperators.RandomPartialOppositor([
      (1, 2, OppositionOperators.Discrete.integers_by_order),

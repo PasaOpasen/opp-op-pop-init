@@ -1,5 +1,6 @@
 
 
 from .oppositor import OppositionOperators
-from .initialiser import SampleInitializers, init_population
+from .initialiser import SampleInitializers
+from .main import init_population
 

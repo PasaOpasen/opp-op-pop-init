@@ -21,7 +21,7 @@ max_bound = np.array([16, 26])
 
 creator = SampleInitializers.Uniform(minimums = min_bound, maximums=max_bound)
 
-points = init_population(total_count = 6, creator= creator)
+points = init_population(samples_count= 6, creator= creator)
 
 
 oppositor = OppositionOperators.Continual.quasi_reflect(minimums= min_bound, maximums= max_bound)

@@ -7,13 +7,11 @@ version](https://badge.fury.io/py/OppOpPopInit.svg)](https://pypi.org/project/Op
 [![Downloads](https://pepy.tech/badge/oppoppopinit/month)](https://pepy.tech/project/oppoppopinit)
 [![Downloads](https://pepy.tech/badge/oppoppopinit/week)](https://pepy.tech/project/oppoppopinit)
 
-```
-pip install OppOpPopInit
-```
+**OPP**osition learning **OP**erators and **POP**ulation **INIT**ializers is the python package containing opposition learning operators and population initializers for evolutionary algorithms.
 
-PyPI package containing opposition learning operators and population initializers for evolutionary algorithms.
 
 - [Opposition learning operators and population initializers](#opposition-learning-operators-and-population-initializers)
+  - [Installation](#installation)
   - [About opposition operators](#about-opposition-operators)
   - [Imports](#imports)
   - [Available opposition operators](#available-opposition-operators)
@@ -38,6 +36,17 @@ PyPI package containing opposition learning operators and population initializer
       - [`Mixed`](#mixed)
     - [Populations with oppositions](#populations-with-oppositions)
 
+## Installation
+
+```
+pip install OppOpPopInit
+```
+
+or 
+
+```
+pip3 install OppOpPopInit
+```
 
 ## About opposition operators
 
@@ -50,10 +59,8 @@ This package provides several operators for creating oppositions (**opposition o
 What can u import from this package:
 
 ```python
-from OppOpPopInit import OppositionOperators # available opposition operators
-from OppOpPopInit import SampleInitializers # available population initializers
-from OppOpPopInit import init_population # function to initialize population using pop. initializers and several oppositors
-```
+from OppOpPopInit import OppositionOperators, init_population  # available opposition operators
+from OppOpPopInit import SampleInitializers # available population initializers```
 
 ## Available opposition operators
 

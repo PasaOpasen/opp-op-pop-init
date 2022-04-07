@@ -18,7 +18,7 @@ setuptools.setup(
     keywords=['opposition-based-learning', 'optimization', 'evolutionary algorithms', 'fast', 'easy', 'evolution', 'generator'],
     packages=setuptools.find_packages(),
     classifiers=[
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Topic :: Software Development :: Libraries :: Python Modules",

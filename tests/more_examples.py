@@ -11,34 +11,40 @@ sys.path.append('..')
 import numpy as np
 
 from OppOpPopInit import OppositionOperators, init_population, SampleInitializers
-from plot_oppositions import plot_oppositions
+from OppOpPopInit.plotting import plot_oppositions
 
+from OppOpPopInit import set_seed
+
+set_seed(1)
 
 
 min_bound = np.array([-8, -1])
 max_bound = np.array([16, 26])
 
+kwargs = dict(minimums = min_bound, maximums=max_bound)
 
-creator = SampleInitializers.Uniform(minimums = min_bound, maximums=max_bound)
-
+creator = SampleInitializers.Uniform(**kwargs)
 point = init_population(samples_count= 1, creator= creator)
 
 
 oppositors = [
-    OppositionOperators.Continual.over(minimums= min_bound, maximums= max_bound),
-    OppositionOperators.Continual.quasi(minimums= min_bound, maximums= max_bound),
-    OppositionOperators.Continual.quasi_reflect(minimums= min_bound, maximums= max_bound),
-    OppositionOperators.Continual.abs(minimums= min_bound, maximums= max_bound),
-    OppositionOperators.Continual.modular(minimums= min_bound, maximums= max_bound)
-    ]
+    OppositionOperators.Continual.over(**kwargs),
+    OppositionOperators.Continual.quasi(**kwargs),
+    OppositionOperators.Continual.quasi_reflect(**kwargs),
+    OppositionOperators.Continual.abs(**kwargs),
+    OppositionOperators.Continual.modular(**kwargs)
+]
 
+for i in range(5):
 
-oppositions = np.array([opp(point[0,:]) for opp in oppositors])
+    oppositions = np.array([opp(point[0]) for opp in oppositors])
 
-
-
-plot_oppositions(point[0,:], 
-                 oppositions, 
-                 bounds = np.vstack((min_bound, max_bound)).T, 
-                 names = ['over', 'quasi', 'quasi_reflect', 'abs', 'modular'],
-                 title = "several oppositor operator", net = False, save_as = 'more_5.png')
+    plot_oppositions(
+        point[0,:],
+         oppositions,
+         bounds = np.vstack((min_bound-1, max_bound+1)).T,
+         names = ['over', 'quasi', 'quasi_reflect', 'abs', 'modular'],
+         title = "several oppositor operator",
+         net = False,
+         save_as = f'./output/more_{i+1}.png'
+    )

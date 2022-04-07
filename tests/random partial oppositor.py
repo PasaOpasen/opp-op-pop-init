@@ -10,12 +10,14 @@ sys.path.append('..')
 
 import numpy as np
 
-from OppOpPopInit import OppositionOperators, init_population, SampleInitializers
+from OppOpPopInit import OppositionOperators, init_population, SampleInitializers, set_seed
+
+set_seed(80)
 
 dim = 10
 
 minimums = np.full(dim, -5)
-maximums = np.full(dim, 5)
+maximums = 5
 
 creator = SampleInitializers.RandomInteger(minimums, maximums)
 
@@ -26,7 +28,8 @@ oppositor = OppositionOperators.RandomPartialOppositor([
      (1, 1, OppositionOperators.Discrete.integers_by_order)
     ], 
     minimums, maximums,
-    total_dim = dim)
+    total_dim = dim
+)
 
 oppositions = OppositionOperators.Reflect(points, oppositor)
 

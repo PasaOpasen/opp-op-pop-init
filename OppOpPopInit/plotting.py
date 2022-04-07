@@ -1,4 +1,4 @@
-from typing import Tuple, Optional, Sequence
+from typing import Tuple, Optional, Sequence, List
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,7 +16,7 @@ def _set_axis(
 
     return result
 
-def _plot_net(xmin: float, ymin: float, xmax: float, ymax: float):
+def _plot_net(xmin: float, xmax: float, ymin: float,  ymax: float):
     xs = np.arange(round(xmin), round(xmax) + 1)
     ys = np.arange(round(ymin), round(ymax) + 1)
 
@@ -169,13 +169,25 @@ def plot_oppositions(
     plt.show()
 
 
-def plot_pop(points, bounds, title, net=False, save_as=None):
+def plot_pop(
+    points: np.ndarray,
+    bounds: Tuple[
+        Tuple[float, float],
+        Tuple[float, float]
+    ],
+    title: str,
+    net: bool = False,
+    save_as: Optional[str] = None
+):
+    """
+    plots points from 2D array with shape samples*2
+    """
     xmin, xmax, ymin, ymax = _set_axis(bounds)
 
     if net:
         _plot_net(xmin, xmax, ymin, ymax)
 
-    plt.plot(points[:, 0], points[:, 1], 'ro', color='green', label='population points', markeredgecolor="black")
+    plt.plot(points[:, 0], points[:, 1], 'o', color='green', label='population points', markeredgecolor="black")
 
     # plt.legend()
     plt.title(title)
@@ -184,47 +196,51 @@ def plot_pop(points, bounds, title, net=False, save_as=None):
 
     plt.show()
 
-######
 
-colors = [
+_colors = (
     'green',
     'red',
     'blue',
     'yellow',
     'black',
-    'orange'
-]
+    'orange',
+    'violet'
+)
 
 
-def plot_pop_op(points, names, bounds, title, net=False, save_as=None):
-    xmin, xmax, ymin, ymax = bounds[0, 0], bounds[0, 1], bounds[1, 0], bounds[1, 1]
-    plt.axis((xmin, xmax, ymin, ymax))
+def plot_pop_op(
+    points,
+    bounds: Tuple[
+        Tuple[float, float],
+        Tuple[float, float]
+    ],
+    names: List[str],
+    title: str,
+    net: bool = False,
+    save_as: Optional[str] = None
+):
+
+    xmin, xmax, ymin, ymax = _set_axis(bounds)
 
     if net:
-        xs = np.arange(round(xmin), round(xmax) + 1)
-        ys = np.arange(round(ymin), round(ymax) + 1)
-
-        for xc in xs:
-            plt.axvline(x=xc, color='k', linestyle='--', lw=0.3)
-
-        for yc in ys:
-            plt.axhline(y=yc, color='k', linestyle='--', lw=0.3)
+        _plot_net(xmin, xmax, ymin, ymax)
 
     names = ['start random pop'] + names
 
     s = int(points.shape[0] / len(names))
+    assert s > 0, 'not enough points'
 
     for i, name in enumerate(names):
-        pt = points[i * s:(i + 1) * s, :]
-        plt.plot(pt[:, 0], pt[:, 1], 'ro',
-                 color=colors[i],
-                 label=name, markeredgecolor="black")
+        pt = points[i * s:(i + 1) * s]
+        plt.plot(pt[:, 0], pt[:, 1], 'o',
+                 color=_colors[i % len(_colors)],
+                 label=name, markeredgecolor="black"
+                )
 
     plt.legend()
     plt.title(title)
 
-    if save_as != None:
-        plt.savefig(save_as, dpi=200)
+    _save_fig(save_as)
 
     plt.show()
 

@@ -16,6 +16,11 @@ version](https://badge.fury.io/py/OppOpPopInit.svg)](https://pypi.org/project/Op
   - [Installation](#installation)
   - [About opposition operators](#about-opposition-operators)
   - [Imports](#imports)
+  - [Interface agreements](#interface-agreements)
+    - [Borders](#borders)
+    - [Format of **creators** and **oppositors**](#format-of-creators-and-oppositors)
+  - [Available opposition operators](#available-opposition-operators)
+    - [Checklist](#checklist)
     - [Examples](#examples)
       - [`abs` oppositor](#abs-oppositor)
       - [`modular` oppositor](#modular-oppositor)
@@ -24,7 +29,7 @@ version](https://badge.fury.io/py/OppOpPopInit.svg)](https://pypi.org/project/Op
       - [`over` oppositor](#over-oppositor)
       - [`integers_by_order` oppositor](#integers_by_order-oppositor)
       - [More examples](#more-examples)
-    - [Partial oppositor](#partial-oppositor)
+    - [Partial/Combined oppositor](#partialcombined-oppositor)
     - [RandomPartialOppositor](#randompartialoppositor)
     - [Reflect method](#reflect-method)
     - [Reflection with selection best](#reflection-with-selection-best)
@@ -59,65 +64,66 @@ This package provides several operators for creating oppositions (**opposition o
 What can u import from this package:
 
 ```python
-from OppOpPopInit import OppositionOperators, init_population  # available opposition operators
-from OppOpPopInit import SampleInitializers  # available population initializers```
+from OppOpPopInit import OppositionOperators # available opposition operators as static class
+from OppOpPopInit import SampleInitializers  # available population initializers as static class
+
+# main function which creates random population
+# using initializers and oppositors
+from OppOpPopInit import init_population 
+```
+
+Also there is a little module for plotting pictures like u can see below
+
+```python
+import OppOpPopInit.plotting
+```
+
+## Interface agreements
+
+### Borders
+
+In the entire part of math optimization tasks the best skin of possible solutions is using 1D-vectors `(x1, x2, ..., xn)` of variables where each variables `x` can be from some area `[xmin, xmax]`. [geneticalgorithm2 package](https://github.com/PasaOpasen/geneticalgorithm2) and this package are both geared towards this case.
+
+So, many functions here takes arguments `minimums` and `maximums` which mean the lower and the upper bounds (borders) of available areas by each using dimension. `minimums` and `maximums` should be sequences of integer or real numbers or only one number, but they cannot be numbers both and they must have equal length if they are sequence both.
+
+### Format of **creators** and **oppositors**
+
+**Creators** are functions which create random samples (depended on bounds). In code a creator can be any object who can be called like function with signature `() -> np.ndarray` (`Callable[[], np.ndarray]`).
+
+**Oppositors** are functions which take `np.ndarray` samples and return it's opposed form as `np.ndarray`. So in code an oppositor if the object can be called like `(np.ndarray) -> np.ndarray` (`Callable[[np.ndarray], np.ndarray]`).
 
 ## Available opposition operators
 
 ### Checklist
-
-There
-are
-several
-operators
-constructors.Main
-part
-of
-them
-should
-use
-two
-arguments:
-*`minimums` - - numpy
-array
-with minimum borders for each dimension
-*`maximums` - - numpy
-array
-with maximum borders for each dimension
-
-Checklist:
 
 *`OppositionOperators.Continual.abs`
 *`OppositionOperators.Continual.modular`
 *`OppositionOperators.Continual.quasi`
 *`OppositionOperators.Continual.quasi_reflect`
 *`OppositionOperators.Continual.over`
-*`OppositionOperators.Continual.Partial` - -
-for using different opposition operators for each dimension with continual task
-*`OppositionOperators.Discrete.integers_by_order` - - it
-'s like `abs` operator but for integer values
-*`OppositionOperators.CombinedOppositor` - -
-for using different opposition operators for each dimension with continual or mixed task.See example[below](  # partial-oppositor)
+*`OppositionOperators.Continual.Partial` -- for using several opposition operators for each subset of searching area.
+*`OppositionOperators.Discrete.integers_by_order` -- it's like `abs` operator but for integer values
+
+*`OppositionOperators.CombinedOppositor` -- for using existing opposition operators for each dimension with continual or mixed task. See example[below](#partial-oppositor)
 
 U can create your own oppositor using pattern:
-  ```python
 
-
-def oppositor(sample_as_array):
+```python
+def oppositor(sample: np.ndarray) -> np.ndarray:
   # some code
-  return new_sample_as_array
+  return new_sample
 ```
 
-There are also `OppositionOperators.Discrete.index_by_order` and `OppositionOperators.Discrete.value_by_order` constructors for very special discrete tasks with available sets of valid values (like `[-1, 0, 1, 5, 15]`), but it's highly recommended to convert this task to indexes array task (and use `OppositionOperators.Discrete.integers_by_order`) like below:
+There are also `OppositionOperators.Discrete._index_by_order` and `OppositionOperators.Discrete.value_by_order` constructors for very special discrete tasks with available sets of valid values (like `[-1, 0, 1, 5, 15]`), but it's highly recommended to convert this task to indexes array task (and use `OppositionOperators.Discrete.integers_by_order`) like below:
 
 ```python
 # available values
 vals = np.array([1, 90. -45, 3, 0.7, 3.4, 12])
 
-valid_array_example = np.array([1,1,1,3,-45])
+valid_array_example = np.array([1, 1, 1, 3, -45])
 
 # function
-def optimized_func(arr):
+def optimized_func(arr: np.ndarray) -> float:
     #some code
     return result
 
@@ -129,65 +135,96 @@ def new_optimized_functio(new_arr):
     return optimized_func(arr)
 
 # and forth u are using indexes format for your population
+
+print(
+  new_optimized_functio(
+    np.array([0, 0, 1, 4])
+  )
+)
 ```
 
 ### Examples
 
 #### `abs` oppositor
 
-[Code](tests/abs_op.py)
-![](tests/abs.png)
+[Code](tests/op_abs.py)
+![](tests/output/abs.png)
+        
+
 
 #### `modular` oppositor
 
-[Code](tests/modular_op.py)
-![](tests/modular.png)
+[Code](tests/op_modular.py)
+![](tests/output/modular.png)
+        
+
 
 #### `quasi` oppositor
 
-[Code](tests/quasi_op.py)
-![](tests/quasi.png)
+[Code](tests/op_quasi.py)
+![](tests/output/quasi.png)
+        
 
 
 #### `quasi_reflect` oppositor
 
-[Code](tests/quasi_reflect_op.py)
-![](tests/quasi_reflect.png)
+[Code](tests/op_quasi_reflect.py)
+![](tests/output/quasi_reflect.png)
+        
 
 
 #### `over` oppositor
 
-[Code](tests/over_op.py)
-![](tests/over.png)
-
+[Code](tests/op_over.py)
+![](tests/output/over.png)
+        
 
 #### `integers_by_order` oppositor
 
-[Code](tests/integers_op.py)
-![](tests/integers_by_order.png)
+[Code](tests/op_integers_by_order.py)
+![](tests/output/integers_by_order.png)
+
 
 #### More examples
 
-![](tests/more_1.png)
-![](tests/more_2.png)
-![](tests/more_3.png)
-![](tests/more_4.png)
-![](tests/more_5.png)
+[Code](tests/more_examples.py)
 
-### Partial oppositor
+![](tests/output/more_1.png)
+![](tests/output/more_2.png)
+![](tests/output/more_3.png)
+![](tests/output/more_4.png)
+![](tests/output/more_5.png)
 
-Create `Partial` oppositor using this structure:
+### Partial/Combined oppositor
+
+If u want to use some oppositor to one dimenstion subset (e. g. indexes 0, 1, 3) and other oppositors for other subsets (e. g. indexes 2, 4, 5) -- u need to create `Partial` or `Combined` oppositors. The difference between them is that u need existing oppositors to make combined oppositor with them and u need oppositor makers to make partial oppositor. So, `Partial` oppositor is often easier to use but `Combined` is more flexible.
+
+To create `Combined` oppositor use code like:
 
 ```python
 oppositor = OppositionOperators.CombinedOppositor(
   [
-    (numpy_array_of_indexes, oppositor_for_this_dimentions),
-    (numpy_array_of_indexes, oppositor_for_this_dimentions),
+    (sequece of indexes to apply, oppositor_for_this_dimentions),
+    (sequece of indexes to apply, oppositor_for_this_dimentions),
     ...
-    (numpy_array_of_indexes, oppositor_for_this_dimentions)
+    (sequece of indexes to apply, oppositor_for_this_dimentions)
   ]
 )
 ```
+
+To create `Partial` oppositor use code:
+
+```python
+oppositor = OppositionOperators.PartialOppositor(
+    minimums=minimumns,
+    maximums=maximums,
+    indexes_to_opp_creator=[
+        (sequece of indexes to apply, oppositor_creator),
+        (sequece of indexes to apply, oppositor_creator)
+    ]
+)
+```
+
 
 Example:
 
@@ -225,11 +262,22 @@ oppositor = OppositionOperators.CombinedOppositor(
   ]
 )
 
+# or 
+
+oppositor = OppositionOperators.PartialOppositor(
+    minimums=min_bound,
+    maximums=max_bound,
+    indexes_to_opp_creator=[
+        (first_op_indexes, OppositionOperators.Continual.abs),
+        (second_op_indexes, OppositionOperators.Continual.over)
+    ]
+)
+
 # as u see, it's not necessary to oppose population by all dimensions, here we won't oppose by last dimension
 
 oppositions = OppositionOperators.Reflect(points, oppositor)
 
-oppositions
+print(oppositions)
 
 # array([[-4.        ,  1.84589799, -4.7       ,  5.04795851,  7.5       ],
 #       [-4.6       , -0.74399971, -5.6       ,  7.49178902,  5.        ],
@@ -238,8 +286,8 @@ oppositions
 
 ```
 
-[Another example code](tests/mixed_op.py)
-![](tests/mixed.png)
+[Another example code](tests/op_mixed.py)
+![](tests/output/mixed.png)
 
 
 ### RandomPartialOppositor

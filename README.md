@@ -5,7 +5,7 @@
 version](https://badge.fury.io/py/OppOpPopInit.svg)](https://pypi.org/project/OppOpPopInit/)
 [![Downloads](https://pepy.tech/badge/oppoppopinit)](https://pepy.tech/project/oppoppopinit)
 [![Downloads](https://pepy.tech/badge/oppoppopinit/month)](https://pepy.tech/project/oppoppopinit)
-[![Downloads](https://pepy.tech/badge/oppoppopinit/week)](https://pepy.tech/project/oppoppopinit)
+[![Downloads](https://pepy.tech/badge/oppoppopinit/week)](https://pepy.tech/project/oppoppopinit) [![Join the chat at https://gitter.im/opp-op-pop-init/community](https://badges.gitter.im/opp-op-pop-init/community.svg)](https://gitter.im/opp-op-pop-init/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 **OPP**osition learning **OP**erators and **POP**ulation **INIT**ializers is the python package containing opposition learning operators and population initializers for evolutionary algorithms.
 

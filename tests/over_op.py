@@ -11,7 +11,7 @@ sys.path.append('..')
 import numpy as np
 
 from OppOpPopInit import OppositionOperators, init_population, SampleInitializers
-from plot_opposition import plot_opposition
+from OppOpPopInit.plot_opposition import plot_opposition
 
 
 

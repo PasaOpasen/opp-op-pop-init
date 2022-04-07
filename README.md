@@ -60,32 +60,52 @@ What can u import from this package:
 
 ```python
 from OppOpPopInit import OppositionOperators, init_population  # available opposition operators
-from OppOpPopInit import SampleInitializers # available population initializers```
+from OppOpPopInit import SampleInitializers  # available population initializers```
 
 ## Available opposition operators
 
 ### Checklist
 
-There are several operators constructors. Main part of them should use two arguments:
-* `minimums` -- numpy array with minimum borders for each dimension
-* `maximums` -- numpy array with maximum borders for each dimension 
+There
+are
+several
+operators
+constructors.Main
+part
+of
+them
+should
+use
+two
+arguments:
+*`minimums` - - numpy
+array
+with minimum borders for each dimension
+*`maximums` - - numpy
+array
+with maximum borders for each dimension
 
 Checklist:
 
-* `OppositionOperators.Continual.abs`
-* `OppositionOperators.Continual.modular`
-* `OppositionOperators.Continual.quasi`
-* `OppositionOperators.Continual.quasi_reflect`
-* `OppositionOperators.Continual.over`
-* `OppositionOperators.Continual.Partial` -- for using different opposition operators for each dimension with continual task
-* `OppositionOperators.Discrete.integers_by_order` -- it's like `abs` operator but for integer values
-* `OppositionOperators.PartialOppositor` -- for using different opposition operators for each dimension with continual or mixed task. See example [below](#partial-oppositor)
+*`OppositionOperators.Continual.abs`
+*`OppositionOperators.Continual.modular`
+*`OppositionOperators.Continual.quasi`
+*`OppositionOperators.Continual.quasi_reflect`
+*`OppositionOperators.Continual.over`
+*`OppositionOperators.Continual.Partial` - -
+for using different opposition operators for each dimension with continual task
+*`OppositionOperators.Discrete.integers_by_order` - - it
+'s like `abs` operator but for integer values
+*`OppositionOperators.CombinedOppositor` - -
+for using different opposition operators for each dimension with continual or mixed task.See example[below](  # partial-oppositor)
 
 U can create your own oppositor using pattern:
-```python
+  ```python
+
+
 def oppositor(sample_as_array):
-    # some code
-    return new_sample_as_array
+  # some code
+  return new_sample_as_array
 ```
 
 There are also `OppositionOperators.Discrete.index_by_order` and `OppositionOperators.Discrete.value_by_order` constructors for very special discrete tasks with available sets of valid values (like `[-1, 0, 1, 5, 15]`), but it's highly recommended to convert this task to indexes array task (and use `OppositionOperators.Discrete.integers_by_order`) like below:
@@ -159,13 +179,13 @@ def new_optimized_functio(new_arr):
 Create `Partial` oppositor using this structure:
 
 ```python
-oppositor = OppositionOperators.PartialOppositor(
-    [
-        (numpy_array_of_indexes, oppositor_for_this_dimentions),
-        (numpy_array_of_indexes, oppositor_for_this_dimentions),
-        ...
-        (numpy_array_of_indexes, oppositor_for_this_dimentions)
-    ]
+oppositor = OppositionOperators.CombinedOppositor(
+  [
+    (numpy_array_of_indexes, oppositor_for_this_dimentions),
+    (numpy_array_of_indexes, oppositor_for_this_dimentions),
+    ...
+    (numpy_array_of_indexes, oppositor_for_this_dimentions)
+  ]
 )
 ```
 
@@ -182,27 +202,27 @@ max_bound = np.array([5, 4, 4, 9, 9])
 
 # population points
 points = np.array([
-    [1, 2, 3, 4, 7.5],
-    [1.6, -2, 3.9, 0.4, 5],
-    [1.1, 3.2, -3, 4, 5],
-    [4.1, 2, 3, -4, 0.5]
-    ])
+  [1, 2, 3, 4, 7.5],
+  [1.6, -2, 3.9, 0.4, 5],
+  [1.1, 3.2, -3, 4, 5],
+  [4.1, 2, 3, -4, 0.5]
+])
 
 # saved indexes for oppositors
 first_op_indexes = np.array([0, 2])
 second_op_indexes = np.array([1, 3])
 
-oppositor = OppositionOperators.PartialOppositor(
-    [
-        (first_op_indexes, OppositionOperators.Continual.abs(
-            minimums= min_bound[first_op_indexes],
-            maximums= max_bound[first_op_indexes],
-            )),
-        (second_op_indexes, OppositionOperators.Continual.over(
-            minimums= min_bound[second_op_indexes],
-            maximums= max_bound[second_op_indexes],
-        ))
-    ]
+oppositor = OppositionOperators.CombinedOppositor(
+  [
+    (first_op_indexes, OppositionOperators.Continual.abs(
+      minimums=min_bound[first_op_indexes],
+      maximums=max_bound[first_op_indexes],
+    )),
+    (second_op_indexes, OppositionOperators.Continual.over(
+      minimums=min_bound[second_op_indexes],
+      maximums=max_bound[second_op_indexes],
+    ))
+  ]
 )
 
 # as u see, it's not necessary to oppose population by all dimensions, here we won't oppose by last dimension
@@ -211,7 +231,7 @@ oppositions = OppositionOperators.Reflect(points, oppositor)
 
 oppositions
 
-#array([[-4.        ,  1.84589799, -4.7       ,  5.04795851,  7.5       ],
+# array([[-4.        ,  1.84589799, -4.7       ,  5.04795851,  7.5       ],
 #       [-4.6       , -0.74399971, -5.6       ,  7.49178902,  5.        ],
 #       [-4.1       ,  0.54619162,  1.3       ,  6.14214043,  5.        ],
 #       [-7.1       , -2.59648698, -4.7       ,  0.95770904,  0.5       ]])

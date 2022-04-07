@@ -10,7 +10,7 @@ setuptools.setup(
     version="1.2.0",
     author="Demetry Pascal",
     author_email="qtckpuhdsa@gmail.com",
-    maintainer = ['Demetry Pascal'],
+    maintainer = 'Demetry Pascal',
     description="PyPI package containing opposition learning operators and population initializers for evolutionary algorithms",
     long_description=long_description,
     long_description_content_type="text/markdown",

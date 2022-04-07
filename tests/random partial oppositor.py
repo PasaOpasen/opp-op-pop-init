@@ -9,11 +9,8 @@ import sys
 sys.path.append('..')
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 from OppOpPopInit import OppositionOperators, init_population, SampleInitializers
-from plot_opposition import plot_opposition
-
 
 dim = 10
 

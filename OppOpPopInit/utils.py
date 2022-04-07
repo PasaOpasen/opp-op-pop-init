@@ -1,13 +1,24 @@
-from typing import Union, Sequence, Tuple
+import random
+from typing import Union, Sequence, Tuple, Optional
 
 import numpy as np
 
 
 def is_number(x):
+
+    if hasattr(x, '__len__'):
+        return False
+
     try:
         return bool(0 == x*0)
     except:
         return False
+
+
+def set_seed(seed: Optional[int] = None):
+    if seed is not None:
+        random.seed(seed)
+        np.random.seed(seed)
 
 
 def _check_mins_maxs(

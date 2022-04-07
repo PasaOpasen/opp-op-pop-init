@@ -1,12 +1,12 @@
 
-from typing import Sequence, Union, Tuple, Callable
+from typing import Sequence, Union, Tuple, Callable, Optional
 
 import warnings
 
 import random
 import numpy as np 
 
-from .utils import is_number, _check_mins_maxs
+from .utils import _check_mins_maxs
 
 
 class OppositionOperators:
@@ -40,7 +40,7 @@ class OppositionOperators:
 
             valid_lists = [arr.tolist() for arr in arrays]
 
-            def func(values: np.ndarray):
+            def func(values: np.ndarray) -> np.ndarray:
                 return by_index(
                     np.array([arr.index(val) for arr, val in zip(valid_lists, values)])
                 )
@@ -51,14 +51,15 @@ class OppositionOperators:
         def integers_by_order(
             minimums: Union[int, Sequence[int]],
             maximums: Union[int, Sequence[int]]
-        ):
+        ) -> Callable[[np.ndarray], np.ndarray]:
             """
             returns like Continual abs 
             but for integer variables
             """
             mins, maxs = _check_mins_maxs(minimums, maximums, check_int=True)
 
-            to_zero = maxs - mins
+            # shift to zero (get count of available cases by each dim)
+            to_zero = maxs - mins + 1
 
             oppositor = OppositionOperators.Discrete._index_by_order(to_zero)
             return lambda array_of_values: mins + oppositor(array_of_values - mins)
@@ -98,17 +99,17 @@ class OppositionOperators:
 
             for x between a, b
             c = (a+b)/2
-            returns (x + a - c) mod (b-a)
+            returns a + (x + a - c) mod (b-a)
             """
             mins, maxs = _check_mins_maxs(minimums, maximums)
             
             diff = maxs - mins
             centers = (mins + maxs)/2
 
-            bias = centers - mins
+            bias = - centers + mins
 
             def func(values: np.ndarray):
-                return (values + bias) % diff
+                return mins + (values + bias) % diff
             
             return func
 
@@ -171,39 +172,42 @@ class OppositionOperators:
             
             return func  
 
-        @staticmethod
-        def Partial(
-            minimums: Union[float, Sequence[float]],
-            maximums: Union[float, Sequence[float]],
-            indexes_to_opp_creator: Sequence[
-                Tuple[
-                    Sequence[int],
-                    Callable[
-                        [np.ndarray, np.ndarray],
-                        Callable[[np.ndarray], np.ndarray]
-                    ]
-                ]
-            ]
-        ):
-            """
-            Partial oppositor for continual space and common minimums and maximums bounds
-
-            indexes_to_opp_creator is list of pairs like ([0, 1, 4], oppositor_creator)
-            """
-            mins, maxs = _check_mins_maxs(minimums, maximums)
-
-            indexes_list = [np.array(t[0], dtype=np.int16) for t in indexes_to_opp_creator]
-            creators_list = [t[1] for t in indexes_list]
-
-            list_of_pairs = [
-                (indexes, oppositor_creator(mins[indexes], maxs[indexes]))
-                for indexes, oppositor_creator in zip(indexes_list, creators_list)
-            ]
-
-            return OppositionOperators.PartialOppositor(list_of_pairs)
-
     @staticmethod
     def PartialOppositor(
+        minimums: Union[float, Sequence[float]],
+        maximums: Union[float, Sequence[float]],
+        indexes_to_opp_creator: Sequence[
+            Tuple[
+                Sequence[int],
+                Callable[
+                    [np.ndarray, np.ndarray],
+                    Callable[[np.ndarray], np.ndarray]
+                ]
+            ]
+        ]
+    ):
+        """
+        Partial oppositor for common minimums and maximums bounds
+
+        creates small oppositor for some indexes of space for all oppositors
+        and removes big oppositor which applies these small oppositors to their indexes
+
+        indexes_to_opp_creator is a sequence of pairs like ([0, 1, 4], oppositor_creator)
+        """
+        mins, maxs = _check_mins_maxs(minimums, maximums)
+
+        indexes_list = [np.array(t[0], dtype=np.int16) for t in indexes_to_opp_creator]
+        creators_list = [t[1] for t in indexes_to_opp_creator]
+
+        list_of_pairs = [
+            (indexes, oppositor_creator(mins[indexes], maxs[indexes]))
+            for indexes, oppositor_creator in zip(indexes_list, creators_list)
+        ]
+
+        return OppositionOperators.CombinedOppositor(list_of_pairs)
+
+    @staticmethod
+    def CombinedOppositor(
         indexes_to_oppositor: Sequence[
             Tuple[
                 Sequence[int],
@@ -212,9 +216,13 @@ class OppositionOperators:
         ]
     ):
         """
-        Implementation of partial oppositor
+        Implementation of combined oppositor
 
-        for sequence of pairs like [([0, 1, 2], oppositor1) ,  ([4, 6, 7], oppositor2) , ([5, 8, 3], oppositor3) ,]
+        for sequence of pairs like [
+            ([0, 1, 2], oppositor1) ,
+            ([4, 6, 7], oppositor2) ,
+            ([5, 8, 3], oppositor3)
+        ]
 
         returns partial oppositor applying these oppositors for these indexes
         """
@@ -236,6 +244,7 @@ class OppositionOperators:
             for j in range(i+1, len(arrays)):
                 inter = dic_of_sets[i] & dic_of_sets[j]
                 if inter:
+                    # no exception cuz it should works with partial oppositor too
                     #raise Exception(f"indexes {inter} are common for pairs {i} and {j}")
                     warnings.warn(f"indexes {inter} are common for pairs {i} and {j}")
 
@@ -249,74 +258,110 @@ class OppositionOperators:
 
         return func
 
-    ########################################################################
 
     @staticmethod
-    def RandomPartialOppositor(list_of_count_step_oppositor_creator, minimums, maximums, total_dim):
+    def RandomPartialOppositor(
+        list_of_count_step_oppositor_creator: Sequence[
+            Tuple[
+                int,
+                int,
+                Callable[
+                    [np.ndarray, np.ndarray],
+                    Callable[[np.ndarray], np.ndarray]
+                ]
+            ]
+        ],
+        minimums: Union[int, float, Sequence[int], Sequence[float]],
+        maximums: Union[int, float, Sequence[int], Sequence[float]],
+        total_dim: int
+    ):
         """
         Returns random partial oppositor with these options:
-        argument is the list of tuples like (how_many_indexes_for_current_oppositor, times_to_repeate_before_reinit, oppositor)
-        so it creates oppositor with random indexes for each oppositor and repeates calculations some iteration before reinit random indexes for new oppositor
+        argument is the sequence of tuples like
+        (how_many_indexes_for_current_oppositor, times_to_repeate_before_reinit, oppositor)
+
+        so it creates oppositor with random indexes for each small oppositor
+        and repeates calculations some iteration before reinit random indexes for new oppositor
         """
+        mins, maxs = _check_mins_maxs(minimums, maximums)
 
         # convert start data
-        def get_part(place):
+        def _get_part(place: int):
             return [t[place] for t in list_of_count_step_oppositor_creator]
 
-        random_counts = get_part(0)
-        steps = np.array(get_part(1))
-        oppositors_creators = get_part(2)
+        random_counts = _get_part(0)
+        steps = np.array(_get_part(1))
+        oppositors_creators = _get_part(2)
 
         # local variables
         all_indexes = np.arange(total_dim)
-        need_to_recreate = np.zeros(len(steps), dtype = np.bool) # flag of need to recreate some part of partial oppositor
-        current_counts = np.zeros(len(steps), dtype = np.int16) # counts of current usage by each part of oppositors
-        current_indexes = [np.random.choice(all_indexes, count, replace = False) for count in random_counts] # indexes of oppositors
-        oppositors = [op(minimums[indexes], maximums[indexes]) for op, indexes in zip(oppositors_creators, current_indexes)]
 
-        total_oppositor = lambda tmp:None
+        # flag of need to recreate some part of partial oppositor
+        need_to_recreate = np.zeros(len(steps), dtype=bool)
+        # counts of current usage by each part of oppositors
+        current_counts = np.zeros(len(steps), dtype=np.int16)
+        # indexes of oppositors
+        current_indexes = [np.random.choice(all_indexes, count, replace=False) for count in random_counts]
+        oppositors = [
+            op(mins[indexes], maxs[indexes])
+            for op, indexes in zip(oppositors_creators, current_indexes)
+        ]
+
+        total_oppositor: Callable[[np.ndarray], np.ndarray] = lambda tmp: None
         def recreate_oppositor():
             nonlocal total_oppositor
-            total_oppositor = OppositionOperators.PartialOppositor([[indexes, oppositor] for indexes, oppositor in zip(current_indexes, oppositors)])
-        
+            total_oppositor = OppositionOperators.CombinedOppositor(
+                [
+                    (indexes, oppositor)
+                    for indexes, oppositor in zip(current_indexes, oppositors)
+                ]
+            )
         recreate_oppositor()
 
-        def func(array_of_values):
+        def func(values: np.ndarray):
             nonlocal current_counts, current_indexes, need_to_recreate, oppositors
 
-            answer = total_oppositor(array_of_values)
-            #raise Exception()
+            answer = total_oppositor(values)
             current_counts += 1
             need_to_recreate = current_counts == steps
 
             # if it's needed to create some part of oppositor
-            if np.sum(need_to_recreate) > 0:
+            if (need_to_recreate).sum() > 0:
                 for i, need in enumerate(need_to_recreate):
                     if need:
-                        current_indexes[i] = np.random.choice(all_indexes, random_counts[i], replace = False) # recount needed indexes
-                        current_counts[i] = 0 # reinit cuz it will be new oppositor
-                        oppositors[i] = oppositors_creators[i](minimums[current_indexes[i]], maximums[current_indexes[i]])
+                        # recount needed indexes
+                        inds = np.random.choice(all_indexes, random_counts[i], replace=False)
+                        current_indexes[i] = inds
+                        current_counts[i] = 0  # reinit cuz it will be new oppositor
+                        oppositors[i] = oppositors_creators[i](mins[inds], maxs[inds])
                 
                 # reinit some data
-                need_to_recreate = np.zeros_like(need_to_recreate, dtype = np.bool)
+                need_to_recreate = np.zeros_like(need_to_recreate, dtype=bool)
 
-                recreate_oppositor() # recreate our oppositor with some new parts
+                recreate_oppositor()  # recreate our oppositor with some new parts
 
             return answer
         
         return func
 
     @staticmethod
-    def Reflect(samples, oppositor):
+    def Reflect(samples: np.ndarray, oppositor: Callable[[np.ndarray], np.ndarray]):
         """
-        for each sample in samples creates it's opposition using oppositor function
+        for each sample in samples
+        creates it's opposition using oppositor function
 
-        samples is 2D numpy array with shape (samples, dimension)
+        samples is 2D numpy array with shape (samples, dimension) (samples by row)
         """
-        return np.array([oppositor(samples[i, :]) for i in range(samples.shape[0])])
+        return np.array([oppositor(samples[i]) for i in range(samples.shape[0])])
 
     @staticmethod
-    def ReflectWithSelectionBest(population_samples, oppositor, eval_func, samples_scores = None, more_is_better = False):
+    def ReflectWithSelectionBest(
+        population_samples: np.ndarray,
+        oppositor: Callable[[np.ndarray], np.ndarray],
+        eval_func: Callable[[np.ndarray], float],
+        samples_scores: Optional[np.ndarray] = None,
+        more_is_better: bool = False
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Reflect N objects from population, evaluate scores and select best N from 2N
 
@@ -344,13 +389,17 @@ class OppositionOperators:
         N = population_samples.shape[0]
 
         samples2 = OppositionOperators.Reflect(population_samples, oppositor)
-
         samples_total = np.vstack((population_samples, samples2))
 
         if samples_scores is None:
-            scores = np.array([eval_func(samples_total[i, :]) for i in range(N*2)])
+            scores = np.array([eval_func(samples_total[i]) for i in range(N*2)])
         else:
-            scores = np.concatenate((samples_scores, np.array([eval_func(samples2[i, :]) for i in range(N)])))
+            scores = np.concatenate(
+                (
+                    samples_scores,
+                    np.array([eval_func(samples2[i, :]) for i in range(N)])
+                )
+            )
 
         args = np.argsort(scores)
         args = args[-N::-1] if more_is_better else args[:N] 

@@ -29,7 +29,7 @@ points = np.array([
 first_op_indexes = np.array([0, 2])
 second_op_indexes = np.array([1, 3])
 
-oppositor = OppositionOperators.PartialOppositor(
+oppositor = OppositionOperators.CombinedOppositor(
     [
         (first_op_indexes, OppositionOperators.Continual.abs(
             minimums= min_bound[first_op_indexes],

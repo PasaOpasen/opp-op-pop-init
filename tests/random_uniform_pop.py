@@ -27,4 +27,4 @@ points = init_population(samples_count= 50, creator= creator)
 plot_pop(points,  
                  bounds = np.vstack((min_bound-1, max_bound+1)).T,
                  title = r"$\bf{Uniform}$ initializer", net = False, 
-                 save_as = 'random_uniform_pop.png')
+                 save_as = './output/random_uniform_pop.png')

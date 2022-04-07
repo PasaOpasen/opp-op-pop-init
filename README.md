@@ -292,19 +292,20 @@ print(oppositions)
 
 ### RandomPartialOppositor
 
+One of the most amazing feature of this package is `RandomPartialOppositor`. It lets u apply several oppositors to random subsets of dimension area and change these subsets after some counts after applying. It means that u can apply only one this oppositor to several samples and get result like u applyed several partial oppositors to parts of this samples.
+
 Create `RandomPartialOppositor` oppositor using this structure:
 
 ```python
 oppositor = OppositionOperators.RandomPartialOppositor(
     [
-        (count_of_random_dimensions, repeate_config_during_steps, oppositor_creator),
-        (count_of_random_dimensions, repeate_config_during_steps, oppositor_creator),
+        (count_of_random_dimensions, repeate_config_during_steps, avalable_indexes, oppositor_creator),
+        (count_of_random_dimensions, repeate_config_during_steps, avalable_indexes, oppositor_creator),
         ...
-        (count_of_random_dimensions, repeate_config_during_steps, oppositor_creator)
+        (count_of_random_dimensions, repeate_config_during_steps, avalable_indexes, oppositor_creator)
     ],
     minimums,
-    maximums,
-    current_dimension_count
+    maximums
 )
 ```
 
@@ -332,14 +333,14 @@ There is `OppositionOperators.ReflectWithSelectionBest(population_samples, oppos
 
 See [example](tests/reflection_with_selection.py)
 
-![](tests/reflection_with_selection_before.png)
-![](tests/reflection_with_selection_after.png)
+![](tests/output/reflection_with_selection_before.png)
+![](tests/output/reflection_with_selection_after.png)
 
 ## Population initializers
 
 ### Simple random populations
 
-Like `oppositors operators` there are some constructors for creating start population:
+Like `oppositors operators` there are some constructors for creating creators of start population:
 
 * `SampleInitializers.RandomInteger(minimums, maximums)` -- returns function which will return random integer vectors between `minimums` and `maximums`
 * `SampleInitializers.Uniform(minimums, maximums)` -- returns function which will return random vectors between `minimums` and `maximums` from uniform distribution
@@ -347,34 +348,34 @@ Like `oppositors operators` there are some constructors for creating start popul
 
 U can create your initializer function:
 ```python
-def func():
+def func() -> np.ndarray:
     # code
     return valid_sample_array 
 ```
 
-There is also `SampleInitializers.Combined(minimums, maximums, list_of_indexes, list_of_initializers_creators)` for generate population with [different constructors for each dimension](#mixed)!
+There is also `SampleInitializers.Combined(minimums, maximums, indexes, creator_initializers)` for generate population with [different constructors for each dimension subset](#mixed)!
 
 Use `creator` for initialize population with `k` objects using `SampleInitializers.CreateSamples(creator, k)`.
 
 #### `RandomInteger`
 
 [Code](tests/random_int_pop.py)
-![](tests/random_int_pop.png)
+![](tests/output/random_int_pop.png)
 
 #### `Uniform`
 
 [Code](tests/random_uniform_pop.py)
-![](tests/random_uniform_pop.png)
+![](tests/output/random_uniform_pop.png)
 
 #### `Normal`
 
 [Code](tests/random_normal_pop.py)
-![](tests/random_normal_pop.png)
+![](tests/output/random_normal_pop.png)
 
 #### `Mixed`
 
 [Code](tests/random_mixed_pop.py)
-![](tests/random_mixed_pop.png)
+![](tests/output/random_mixed_pop.png)
 
 
 ### Populations with oppositions
@@ -382,6 +383,6 @@ Use `creator` for initialize population with `k` objects using `SampleInitialize
 Use `init_population(total_count, creator, oppositors = None)` to create population of size `total_count` where some objects are constructed by `creator` and other objects are constructed by applying each oppositor from `oppositors` to start objects.
 
 [Code](tests/pop_with_oppositors.py)
-![](tests/pop_with_op.png)
-![](tests/pop_with_op2.png)
-![](tests/pop_with_op3.png)
+![](tests/output/pop_with_op.png)
+![](tests/output/pop_with_op2.png)
+![](tests/output/pop_with_op3.png)

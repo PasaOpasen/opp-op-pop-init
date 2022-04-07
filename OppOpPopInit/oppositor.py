@@ -265,6 +265,7 @@ class OppositionOperators:
             Tuple[
                 int,
                 int,
+                Sequence[int],
                 Callable[
                     [np.ndarray, np.ndarray],
                     Callable[[np.ndarray], np.ndarray]
@@ -272,13 +273,12 @@ class OppositionOperators:
             ]
         ],
         minimums: Union[int, float, Sequence[int], Sequence[float]],
-        maximums: Union[int, float, Sequence[int], Sequence[float]],
-        total_dim: int
+        maximums: Union[int, float, Sequence[int], Sequence[float]]
     ):
         """
         Returns random partial oppositor with these options:
         argument is the sequence of tuples like
-        (how_many_indexes_for_current_oppositor, times_to_repeate_before_reinit, oppositor)
+        (how_many_indexes_for_current_oppositor, times_to_repeate_before_reinit, availavle indexes, oppositor)
 
         so it creates oppositor with random indexes for each small oppositor
         and repeates calculations some iteration before reinit random indexes for new oppositor
@@ -291,17 +291,22 @@ class OppositionOperators:
 
         random_counts = _get_part(0)
         steps = np.array(_get_part(1))
-        oppositors_creators = _get_part(2)
-
-        # local variables
-        all_indexes = np.arange(total_dim)
+        available_indexes = _get_part(2)
+        oppositors_creators = _get_part(3)
 
         # flag of need to recreate some part of partial oppositor
         need_to_recreate = np.zeros(len(steps), dtype=bool)
         # counts of current usage by each part of oppositors
         current_counts = np.zeros(len(steps), dtype=np.int16)
+        # available indexes of each oppositor
+        assert all(count <= len(available) for count, available in zip(current_counts, available_indexes)), f"all available indexes must be with more len then count to sample them"
+        available_indexes = [np.array(inds) for inds in available_indexes]
+
         # indexes of oppositors
-        current_indexes = [np.random.choice(all_indexes, count, replace=False) for count in random_counts]
+        current_indexes = [
+            np.random.choice(inds, count, replace=False)
+            for inds, count in zip(available_indexes, random_counts)
+        ]
         oppositors = [
             op(mins[indexes], maxs[indexes])
             for op, indexes in zip(oppositors_creators, current_indexes)
@@ -330,7 +335,7 @@ class OppositionOperators:
                 for i, need in enumerate(need_to_recreate):
                     if need:
                         # recount needed indexes
-                        inds = np.random.choice(all_indexes, random_counts[i], replace=False)
+                        inds = np.random.choice(available_indexes[i], random_counts[i], replace=False)
                         current_indexes[i] = inds
                         current_counts[i] = 0  # reinit cuz it will be new oppositor
                         oppositors[i] = oppositors_creators[i](mins[inds], maxs[inds])

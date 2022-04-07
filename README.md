@@ -97,11 +97,17 @@ So, many functions here takes arguments `minimums` and `maximums` which mean the
 ### Checklist
 
 *`OppositionOperators.Continual.abs`
+
 *`OppositionOperators.Continual.modular`
+
 *`OppositionOperators.Continual.quasi`
+
 *`OppositionOperators.Continual.quasi_reflect`
+
 *`OppositionOperators.Continual.over`
+
 *`OppositionOperators.Continual.Partial` -- for using several opposition operators for each subset of searching area.
+
 *`OppositionOperators.Discrete.integers_by_order` -- it's like `abs` operator but for integer values
 
 *`OppositionOperators.CombinedOppositor` -- for using existing opposition operators for each dimension with continual or mixed task. See example[below](#partial-oppositor)

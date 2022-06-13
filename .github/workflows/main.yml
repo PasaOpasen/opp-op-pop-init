@@ -29,11 +29,11 @@ jobs:
       - run: |
             echo $PWD
             pip install pdoc3
-            #pip install -e .
+            pip install -e .
             
       # ADJUST THIS: build your documentation into docs/.
       - run: |
-            pdoc --html -o docs/ ./OppOpPopInit
+            pdoc --html -o docs/ OppOpPopInit
             mv docs/OppOpPopInit/* docs/
             
             # |

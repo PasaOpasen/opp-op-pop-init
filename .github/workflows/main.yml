@@ -31,7 +31,7 @@ jobs:
             pip install -e .
             
       # ADJUST THIS: build your documentation into docs/.
-      - run: pdoc -o docs/ cost2fitness
+      - run: pdoc -o docs/ OppOpPopInit
 
       - run: tar --directory docs/ -hcf artifact.tar .
       - uses: actions/upload-artifact@v3

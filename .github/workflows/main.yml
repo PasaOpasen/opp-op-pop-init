@@ -32,11 +32,14 @@ jobs:
             pip install -e .
             
       # ADJUST THIS: build your documentation into docs/.
-      - run: pdoc --html -o docs/ OppOpPopInit
-            #|
-            #cd docs
-            #make doc  #pdoc -o docs/ OppOpPopInit
-            #cd ../
+      - run: |
+            pdoc --html -o docs/ OppOpPopInit
+            mv docs/OppOpPopInit/* docs/
+            
+            # |
+            # cd docs
+            # make doc  #pdoc -o docs/ OppOpPopInit
+            # cd ../
             
       - run: tar --directory docs/ -hcf artifact.tar .
       - uses: actions/upload-artifact@v3

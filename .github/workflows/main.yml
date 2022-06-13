@@ -27,6 +27,7 @@ jobs:
 
       # ADJUST THIS: install all dependencies (including pdoc)
       - run: |
+            echo $PWD
             pip install pdoc3
             pip install -e .
             

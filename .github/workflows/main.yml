@@ -34,7 +34,7 @@ jobs:
       # ADJUST THIS: build your documentation into docs/.
       - run: |
             cd docs
-            make doc #pdoc -o docs/ OppOpPopInit
+            make doc  #pdoc -o docs/ OppOpPopInit
             cd ../
             
       - run: tar --directory docs/ -hcf artifact.tar .

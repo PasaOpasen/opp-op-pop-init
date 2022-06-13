@@ -1,0 +1,52 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+          
+# security: restrict permissions for CI jobs.
+permissions:
+  contents: read
+
+jobs:
+  # Build the documentation and upload the static HTML files as an artifact.
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+
+      # ADJUST THIS: install all dependencies (including pdoc)
+      - run: pip install pdoc3
+      # ADJUST THIS: build your documentation into docs/.
+      - run: pdoc -o docs/ cost2fitness
+
+      - run: tar --directory docs/ -hcf artifact.tar .
+      - uses: actions/upload-artifact@v3
+        with:
+          name: github-pages
+          path: ./artifact.tar
+  
+  # Deploy the artifact to GitHub pages.
+  # This is a separate job so that only actions/deploy-pages has the necessary permissions.
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v1

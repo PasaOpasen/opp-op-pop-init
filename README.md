@@ -9,6 +9,8 @@ version](https://badge.fury.io/py/OppOpPopInit.svg)](https://pypi.org/project/Op
 
 [![Join the chat at https://gitter.im/opp-op-pop-init/community](https://badges.gitter.im/opp-op-pop-init/community.svg)](https://gitter.im/opp-op-pop-init/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+Documentation: https://pasaopasen.github.io/opp-op-pop-init/
+
 **OPP**osition learning **OP**erators and **POP**ulation **INIT**ializers (from [DPEA](https://github.com/PasaOpasen/PasaOpasen.github.io/blob/master/EA_packages.md)) is the python package containing opposition learning operators and population initializers for evolutionary algorithms.
 
 

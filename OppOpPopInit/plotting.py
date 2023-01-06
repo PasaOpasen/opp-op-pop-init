@@ -1,7 +1,6 @@
 from typing import Tuple, Optional, Sequence, List
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 def _set_axis(
@@ -10,13 +9,19 @@ def _set_axis(
         Tuple[float, float]
     ]
 ):
+    import matplotlib.pyplot as plt
+
     xmin, xmax, ymin, ymax = bounds[0][0], bounds[0][1], bounds[1][0], bounds[1][1]
     result = (xmin, xmax, ymin, ymax)
     plt.axis(result)
 
     return result
 
+
 def _plot_net(xmin: float, xmax: float, ymin: float,  ymax: float):
+
+    import matplotlib.pyplot as plt
+
     xs = np.arange(round(xmin), round(xmax) + 1)
     ys = np.arange(round(ymin), round(ymax) + 1)
 
@@ -29,12 +34,16 @@ def _plot_net(xmin: float, xmax: float, ymin: float,  ymax: float):
 
 def _save_fig(save_as: Optional[str]):
     if save_as is not None:
+        import matplotlib.pyplot as plt
         plt.savefig(save_as, dpi=200)
+
 
 def _random_coords(xmin: float, xmax: float, ymin: float, ymax: float, wd: float = 0.2):
     rx, ry = tuple(np.random.uniform(0.5 - wd, 0.5 + wd, 2))
-    return (xmin * rx + (1 - rx) * xmax, ymin * ry + (1 - ry) * ymax)
-
+    return (
+        xmin * rx + (1 - rx) * xmax,
+        ymin * ry + (1 - ry) * ymax
+    )
 
 
 def plot_opposition(
@@ -71,6 +80,7 @@ def plot_opposition(
 
         plot_opposition(p, op, bounds, title="dfsfwe", net=True)
     """
+    import matplotlib.pyplot as plt
 
     xmin, xmax, ymin, ymax = _set_axis(bounds)
 
@@ -138,6 +148,8 @@ def plot_oppositions(
         plot_oppositions(p, op, bounds, names, title = "opop", net = True)
     """
 
+    import matplotlib.pyplot as plt
+
     xmin, xmax, ymin, ymax = _set_axis(bounds)
 
     if net:
@@ -182,6 +194,8 @@ def plot_pop(
     """
     plots points from 2D array with shape samples*2
     """
+    import matplotlib.pyplot as plt
+
     xmin, xmax, ymin, ymax = _set_axis(bounds)
 
     if net:
@@ -219,6 +233,7 @@ def plot_pop_op(
     net: bool = False,
     save_as: Optional[str] = None
 ):
+    import matplotlib.pyplot as plt
 
     xmin, xmax, ymin, ymax = _set_axis(bounds)
 
@@ -232,10 +247,11 @@ def plot_pop_op(
 
     for i, name in enumerate(names):
         pt = points[i * s:(i + 1) * s]
-        plt.plot(pt[:, 0], pt[:, 1], 'o',
-                 color=_colors[i % len(_colors)],
-                 label=name, markeredgecolor="black"
-                )
+        plt.plot(
+            pt[:, 0], pt[:, 1], 'o',
+            color=_colors[i % len(_colors)],
+            label=name, markeredgecolor="black"
+        )
 
     plt.legend()
     plt.title(title)

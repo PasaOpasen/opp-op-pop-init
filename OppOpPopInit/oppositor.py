@@ -1,12 +1,17 @@
 
-from typing import Sequence, Union, Tuple, Callable, Optional
+from typing import Sequence, Union, Tuple, Callable, Optional, List
 
 import warnings
 
 import random
 import numpy as np 
 
+from .aliases import TypeAlias, array1D, array2D, Number, IntBorder, FloatBorder, Border
+
 from .utils import _check_mins_maxs
+
+
+OppositorFunc: TypeAlias = Callable[[array1D], array1D]
 
 
 class OppositionOperators:
@@ -14,21 +19,21 @@ class OppositionOperators:
     class Discrete:
 
         @staticmethod
-        def _index_by_order(sizes: np.ndarray):
+        def _index_by_order(sizes: array1D) -> OppositorFunc:
             """
             for array of sizes [4, 5, 6]
             returns function which
                 for indexes (from the end) [0, 3, 2]
                 returns opposition indexes [4-1-0, 5-1-3, 6-1-2] = [3, 1, 3]
             """
-            def func(indexes: np.ndarray):
+            def func(indexes: array1D):
                 return sizes - 1 - indexes
             return func
         
         @staticmethod
-        def value_by_order(arrays: Sequence[np.ndarray]):
+        def value_by_order(arrays: Sequence[array1D]) -> OppositorFunc:
             """
-            for list of arrays [ [23, 26, 42] , [78, 53, 12, 11] ]
+            for sequence of arrays [ [23, 26, 42] , [78, 53, 12, 11] ]
             returns function which
                 for values [23, 12]
                 returns opposition values [42, 53]
@@ -38,9 +43,9 @@ class OppositionOperators:
 
             by_index = OppositionOperators.Discrete._index_by_order(arr_sizes)
 
-            valid_lists = [arr.tolist() for arr in arrays]
+            valid_lists: List[List[Number]] = [arr.tolist() for arr in arrays]
 
-            def func(values: np.ndarray) -> np.ndarray:
+            def func(values: array1D) -> array1D:
                 return by_index(
                     np.array([arr.index(val) for arr, val in zip(valid_lists, values)])
                 )
@@ -49,9 +54,9 @@ class OppositionOperators:
         
         @staticmethod
         def integers_by_order(
-            minimums: Union[int, Sequence[int]],
-            maximums: Union[int, Sequence[int]]
-        ) -> Callable[[np.ndarray], np.ndarray]:
+            minimums: IntBorder,
+            maximums: FloatBorder
+        ) -> OppositorFunc:
             """
             returns like Continual abs 
             but for integer variables
@@ -68,9 +73,9 @@ class OppositionOperators:
 
         @staticmethod
         def abs(
-            minimums: Union[float, Sequence[float]],
-            maximums: Union[float, Sequence[float]]
-        ):
+            minimums: FloatBorder,
+            maximums: FloatBorder
+        ) -> OppositorFunc:
             """
             absolute opposition
             for x between a and b returns (a+b-x)
@@ -84,16 +89,16 @@ class OppositionOperators:
 
             prep = mins + maxs
 
-            def func(values: np.ndarray):
+            def func(values: array1D):
                 return prep - values
             
             return func
         
         @staticmethod
         def modular(
-            minimums: Union[float, Sequence[float]],
-            maximums: Union[float, Sequence[float]]
-        ):
+            minimums: FloatBorder,
+            maximums: FloatBorder
+        ) -> OppositorFunc:
             """
             modular opposition
 
@@ -108,16 +113,16 @@ class OppositionOperators:
 
             bias = - centers + mins
 
-            def func(values: np.ndarray):
+            def func(values: array1D):
                 return mins + (values + bias) % diff
             
             return func
 
         @staticmethod
         def quasi_reflect(
-            minimums: Union[float, Sequence[float]],
-            maximums: Union[float, Sequence[float]]
-        ):
+            minimums: FloatBorder,
+            maximums: FloatBorder
+        ) -> OppositorFunc:
             """
             for x and c = (minimums + maximums)/2
             returns random uniform between x and c
@@ -134,9 +139,9 @@ class OppositionOperators:
         
         @staticmethod
         def quasi(
-            minimums: Union[float, Sequence[float]],
-            maximums: Union[float, Sequence[float]]
-        ):
+            minimums: FloatBorder,
+            maximums: FloatBorder
+        ) -> OppositorFunc:
             """
             for x and c = (minimums + maximums)/2
             returns random uniform between abs_opposition(x) and c
@@ -148,16 +153,16 @@ class OppositionOperators:
             
             abs_oppositor = OppositionOperators.Continual.abs(mins, maxs)
 
-            def func(values: np.ndarray):
+            def func(values: array1D):
                 return np.array([random.uniform(c, x) for c, x in zip(centers, abs_oppositor(values))])
             
             return func     
 
         @staticmethod
         def over(
-            minimums: Union[float, Sequence[float]],
-            maximums: Union[float, Sequence[float]]
-        ):
+            minimums: FloatBorder,
+            maximums: FloatBorder
+        ) -> OppositorFunc:
             """
             for x and c = (minimums + maximums)/2
             returns random uniform between x and minimum if x > c and between x and maximum otherwise
@@ -167,25 +172,30 @@ class OppositionOperators:
 
             centers = (mins + maxs)/2
 
-            def func(values: np.ndarray):
-                return np.array([random.uniform(a, x) if x > c else random.uniform(b, x) for a, b, c, x in zip(mins, maxs, centers, values)])
+            def func(values: array1D):
+                return np.array(
+                    [
+                        random.uniform(a, x) if x > c else random.uniform(b, x)
+                        for a, b, c, x in zip(mins, maxs, centers, values)
+                    ]
+                )
             
             return func  
 
     @staticmethod
     def PartialOppositor(
-        minimums: Union[float, Sequence[float]],
-        maximums: Union[float, Sequence[float]],
+        minimums: FloatBorder,
+        maximums: FloatBorder,
         indexes_to_opp_creator: Sequence[
             Tuple[
                 Sequence[int],
                 Callable[
-                    [np.ndarray, np.ndarray],
-                    Callable[[np.ndarray], np.ndarray]
+                    [array1D, array1D],
+                    OppositorFunc
                 ]
             ]
         ]
-    ):
+    ) -> OppositorFunc:
         """
         Partial oppositor for common minimums and maximums bounds
 
@@ -200,7 +210,10 @@ class OppositionOperators:
         creators_list = [t[1] for t in indexes_to_opp_creator]
 
         list_of_pairs = [
-            (indexes, oppositor_creator(mins[indexes], maxs[indexes]))
+            (
+                indexes,
+                oppositor_creator(mins[indexes], maxs[indexes])
+            )
             for indexes, oppositor_creator in zip(indexes_list, creators_list)
         ]
 
@@ -211,10 +224,10 @@ class OppositionOperators:
         indexes_to_oppositor: Sequence[
             Tuple[
                 Sequence[int],
-                Callable[[np.ndarray], np.ndarray]
+                OppositorFunc
             ]
         ]
-    ):
+    ) -> OppositorFunc:
         """
         Implementation of combined oppositor
 
@@ -267,14 +280,14 @@ class OppositionOperators:
                 int,
                 Sequence[int],
                 Callable[
-                    [np.ndarray, np.ndarray],
-                    Callable[[np.ndarray], np.ndarray]
+                    [array1D, array1D],
+                    OppositorFunc
                 ]
             ]
         ],
-        minimums: Union[int, float, Sequence[int], Sequence[float]],
-        maximums: Union[int, float, Sequence[int], Sequence[float]]
-    ):
+        minimums: Border,
+        maximums: Border
+    ) -> OppositorFunc:
         """
         Returns random partial oppositor with these options:
         argument is the sequence of tuples like
@@ -294,25 +307,25 @@ class OppositionOperators:
         available_indexes = _get_part(2)
         oppositors_creators = _get_part(3)
 
-        # flag of need to recreate some part of partial oppositor
-        need_to_recreate = np.zeros(len(steps), dtype=bool)
-        # counts of current usage by each part of oppositors
         current_counts = np.zeros(len(steps), dtype=np.int16)
-        # available indexes of each oppositor
+        """counts of current usage by each part of oppositors"""
+
         assert all(count <= len(available) for count, available in zip(current_counts, available_indexes)), f"all available indexes must be with more len then count to sample them"
         available_indexes = [np.array(inds) for inds in available_indexes]
+        """available indexes of each oppositor"""
 
-        # indexes of oppositors
         current_indexes = [
             np.random.choice(inds, count, replace=False)
             for inds, count in zip(available_indexes, random_counts)
         ]
+        """indexes of oppositors"""
         oppositors = [
             op(mins[indexes], maxs[indexes])
             for op, indexes in zip(oppositors_creators, current_indexes)
         ]
 
-        total_oppositor: Callable[[np.ndarray], np.ndarray] = lambda tmp: None
+        total_oppositor: OppositorFunc = None
+
         def recreate_oppositor():
             nonlocal total_oppositor
             total_oppositor = OppositionOperators.CombinedOppositor(
@@ -323,15 +336,15 @@ class OppositionOperators:
             )
         recreate_oppositor()
 
-        def func(values: np.ndarray):
-            nonlocal current_counts, current_indexes, need_to_recreate, oppositors
+        def func(values: array1D):
+            nonlocal current_counts, current_indexes, oppositors
 
             answer = total_oppositor(values)
             current_counts += 1
-            need_to_recreate = current_counts == steps
+            need_to_recreate: array1D = current_counts == steps
 
             # if it's needed to create some part of oppositor
-            if (need_to_recreate).sum() > 0:
+            if need_to_recreate.sum() > 0:
                 for i, need in enumerate(need_to_recreate):
                     if need:
                         # recount needed indexes
@@ -339,9 +352,6 @@ class OppositionOperators:
                         current_indexes[i] = inds
                         current_counts[i] = 0  # reinit cuz it will be new oppositor
                         oppositors[i] = oppositors_creators[i](mins[inds], maxs[inds])
-                
-                # reinit some data
-                need_to_recreate = np.zeros_like(need_to_recreate, dtype=bool)
 
                 recreate_oppositor()  # recreate our oppositor with some new parts
 
@@ -350,45 +360,47 @@ class OppositionOperators:
         return func
 
     @staticmethod
-    def Reflect(samples: np.ndarray, oppositor: Callable[[np.ndarray], np.ndarray]):
+    def Reflect(samples: array2D, oppositor: OppositorFunc) -> array2D:
         """
         for each sample in samples
         creates it's opposition using oppositor function
 
         samples is 2D numpy array with shape (samples, dimension) (samples by row)
         """
-        return np.array([oppositor(samples[i]) for i in range(samples.shape[0])])
+        return np.array(
+            [oppositor(sample) for sample in samples]
+        )
 
     @staticmethod
     def ReflectWithSelectionBest(
-        population_samples: np.ndarray,
-        oppositor: Callable[[np.ndarray], np.ndarray],
-        eval_func: Callable[[np.ndarray], float],
-        samples_scores: Optional[np.ndarray] = None,
+        population_samples: array2D,
+        oppositor: OppositorFunc,
+        eval_func: Callable[[array1D], float],
+        samples_scores: Optional[array1D] = None,
         more_is_better: bool = False
-    ) -> Tuple[np.ndarray, np.ndarray]:
+
+    ) -> Tuple[array2D, array1D]:
         """
         Reflect N objects from population, evaluate scores and select best N from 2N
 
-        Parameters
-        ----------
-        population_samples : 2D numpy array
-            reflected population.
-        oppositor : function
-            applying oppositor.
-        eval_func : function
-            optimized function of population/task.
-        samples_scores : None/1D numpy array, optional
-            scores for reflected population (if calculated -- it's not necessary to calculate it again). The default is None.
-        more_is_better : logical, optional
-            The goal -- is maximize the function. The default is False.
+        Args:
+            population_samples : 2D numpy array
+                reflected population.
+            oppositor: function
+                applying oppositor.
+            eval_func : function
+                optimized function of population/task.
+            samples_scores : None/1D numpy array, optional
+                scores for reflected population (if calculated -- it's not necessary to calculate it again). The default is None.
+            more_is_better : logical, optional
+                The goal -- is maximize the function. The default is False.
 
-        Returns
-        -------
-        2d numpy array
-            new population -- the best N from start N + reflected N objects.
-        1d numpy array
-            it's scores sorted from best to worse.
+        Returns:
+
+            2d numpy array
+                new population -- the best N from start N + reflected N objects.
+            1d numpy array
+                it's scores sorted from best to worse.
         """
 
         N = population_samples.shape[0]

@@ -23,7 +23,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    install_requires=['numpy']
+    install_requires=['numpy', 'typing_extensions']
     
 )
 

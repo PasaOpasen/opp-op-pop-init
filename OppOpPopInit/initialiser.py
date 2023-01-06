@@ -5,16 +5,22 @@ import collections.abc
 import random
 import numpy as np
 
+from .aliases import IntBorder, FloatBorder, Border, array1D, array2D, TypeAlias
+
 from .utils import is_number, _check_mins_maxs
+
+
+CreatorFunc: TypeAlias = Callable[[],  array1D]
+"""function creates random sample"""
 
 
 class SampleInitializers:
 
     @staticmethod
     def RandomInteger(
-        minimums: Union[int, Sequence[int]],
-        maximums: Union[int, Sequence[int]]
-    ):
+        minimums: IntBorder,
+        maximums: IntBorder
+    ) -> CreatorFunc:
         """
         returns function creating random integer array between minimums and maximums 
         """
@@ -23,9 +29,9 @@ class SampleInitializers:
 
     @staticmethod
     def Uniform(
-        minimums: Union[float, Sequence[float]],
-        maximums: Union[float, Sequence[float]]
-    ):
+        minimums: FloatBorder,
+        maximums: FloatBorder
+    ) -> CreatorFunc:
         """
         returns function creating random array between minimums and maximums using uniform distribution 
         """
@@ -34,10 +40,10 @@ class SampleInitializers:
 
     @staticmethod
     def Normal(
-        minimums: Union[float, Sequence[float]],
-        maximums: Union[float, Sequence[float]],
-        sd: Optional[Union[float, Sequence[float]]] = None
-    ):
+        minimums: FloatBorder,
+        maximums: FloatBorder,
+        sd: Optional[FloatBorder] = None
+    ) -> CreatorFunc:
         """
         returns function creating random array between minimums and maximums using normal distribution 
         """
@@ -69,16 +75,16 @@ class SampleInitializers:
     
     @staticmethod
     def Combined(
-        minimums: Union[float, Sequence[float]],
-        maximums: Union[float, Sequence[float]],
+        minimums: FloatBorder,
+        maximums: FloatBorder,
         indexes: Sequence[Sequence[int]],
         creator_initializers: Sequence[
             Callable[
-                [Union[float, Sequence[float]], Union[float, Sequence[float]]],
-                Callable[[], np.ndarray]
+                [FloatBorder, FloatBorder],
+                CreatorFunc
             ]
         ]
-    ):
+    ) -> CreatorFunc:
         """
         returns creator which creates vectors between minimums and maximums
         using pairs from creator_initializers and indexes to apply them
@@ -87,7 +93,7 @@ class SampleInitializers:
         mins, maxs = _check_mins_maxs(minimums, maximums)
 
         inits_len = len(indexes)
-        assert (inits_len == len(creator_initializers)), f"indexes list and initializers creators list must have equal length, gotten {inits_len} vs {len(creator_initializers)}"
+        assert inits_len == len(creator_initializers), f"indexes list and initializers creators list must have equal length, gotten {inits_len} vs {len(creator_initializers)}"
         
         dim = mins.size
         all_indexes = set(list(range(dim)))
@@ -128,7 +134,7 @@ class SampleInitializers:
         return func
     
     @staticmethod
-    def CreateSamples(creator: Callable[[], np.ndarray], count: int):
+    def CreateSamples(creator: CreatorFunc, count: int) -> array2D:
         """
         returns count objects (as 2D-array) using creator
         """

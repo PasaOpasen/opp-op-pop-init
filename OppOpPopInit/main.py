@@ -4,15 +4,17 @@ import collections.abc
 
 import numpy as np
 
-from .initialiser import SampleInitializers
-from .oppositor import OppositionOperators
+from .aliases import array2D
+from .initialiser import SampleInitializers, CreatorFunc
+from .oppositor import OppositionOperators, OppositorFunc
 
 
 def init_population(
     samples_count: int,
-    creator: Callable[[], np.ndarray],
-    oppositors: Optional[Sequence[Callable[[np.ndarray], np.ndarray]]] = None
-) -> np.ndarray:
+    creator: CreatorFunc,
+    oppositors: Optional[Sequence[OppositorFunc]] = None
+
+) -> array2D:
     """
     Returns population with size samples_count*dim
     using creator and oppositors for creator samples
@@ -37,9 +39,12 @@ def init_population(
     samples_inds = np.arange(init_pop.shape[0])
 
     res = [init_pop] + [
-        OppositionOperators.Reflect(init_pop[np.random.choice(samples_inds, group_size, replace=False), :], oppositor)
+        OppositionOperators.Reflect(
+            init_pop[np.random.choice(samples_inds, group_size, replace=False), :],
+            oppositor
+        )
         for oppositor in oppositors
     ]
 
-    return np.vstack(tuple(res))
+    return np.vstack(res)
 

@@ -2,16 +2,15 @@ from typing import Tuple, Optional, Sequence, List
 
 import numpy as np
 
+from .aliases import PlottingBounds, array2D
+
 
 def _set_axis(
-    bounds: Tuple[
-        Tuple[float, float],
-        Tuple[float, float]
-    ]
+    bounds: PlottingBounds
 ):
     import matplotlib.pyplot as plt
 
-    xmin, xmax, ymin, ymax = bounds[0][0], bounds[0][1], bounds[1][0], bounds[1][1]
+    (xmin, xmax), (ymin, ymax) = bounds
     result = (xmin, xmax, ymin, ymax)
     plt.axis(result)
 
@@ -47,12 +46,9 @@ def _random_coords(xmin: float, xmax: float, ymin: float, ymax: float, wd: float
 
 
 def plot_opposition(
-    points: np.ndarray,
-    oppositions: np.ndarray,
-    bounds: Tuple[
-        Tuple[float, float],
-        Tuple[float, float]
-    ],
+    points: array2D,
+    oppositions: array2D,
+    bounds: PlottingBounds,
     title: str,
     net: bool = False,
     save_as: Optional[str] = None
@@ -117,10 +113,7 @@ def plot_opposition(
 def plot_oppositions(
     point: Tuple[float, float],
     oppositions: np.ndarray,
-    bounds: Tuple[
-        Tuple[float, float],
-        Tuple[float, float]
-    ],
+    bounds: PlottingBounds,
     names: Sequence[str],
     title: str,
     net: bool = False,
@@ -182,11 +175,8 @@ def plot_oppositions(
 
 
 def plot_pop(
-    points: np.ndarray,
-    bounds: Tuple[
-        Tuple[float, float],
-        Tuple[float, float]
-    ],
+    points: array2D,
+    bounds: PlottingBounds,
     title: str,
     net: bool = False,
     save_as: Optional[str] = None
@@ -223,11 +213,8 @@ _colors = (
 
 
 def plot_pop_op(
-    points,
-    bounds: Tuple[
-        Tuple[float, float],
-        Tuple[float, float]
-    ],
+    points: array2D,
+    bounds: PlottingBounds,
     names: List[str],
     title: str,
     net: bool = False,
